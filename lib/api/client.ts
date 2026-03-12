@@ -32,7 +32,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     const refreshed = await refreshTokens();
     if (refreshed) {
       const retryRes = await fetch(url, { ...options, credentials: "include" });
-      if (retryRes.ok) return retryRes.json();
+      if (retryRes.ok) {
+        if (retryRes.status === 204 || retryRes.headers.get("content-length") === "0") {
+          return undefined as T;
+        }
+        return retryRes.json();
+      }
       throw new ApiError(retryRes.status, "Unauthorized after refresh");
     }
     if (typeof window !== "undefined") {

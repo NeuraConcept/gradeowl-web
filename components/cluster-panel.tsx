@@ -104,9 +104,7 @@ export function ClusterPanel({
                 <div className="px-2.5 pb-2 space-y-1 border-t border-border/60 pt-1.5">
                   {sub.sample_answers.map((sample, idx) => {
                     const isSelected =
-                      selectedSample?.student_identifier ===
-                        sample.student_identifier &&
-                      selectedSample?.score === sample.score;
+                      selectedSample?.student_identifier === sample.student_identifier;
                     return (
                       <Button
                         key={idx}

@@ -24,7 +24,7 @@ const submissionStatusConfig: Record<SubmissionStatus, { label: string; classNam
 };
 
 function SubmissionStatusBadge({ status }: { status: SubmissionStatus }) {
-  const config = submissionStatusConfig[status];
+  const config = submissionStatusConfig[status] ?? { label: status, className: "bg-gray-100 text-gray-500" };
   return (
     <Badge className={cn("font-semibold", config.className)}>{config.label}</Badge>
   );

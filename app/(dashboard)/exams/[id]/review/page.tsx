@@ -80,37 +80,28 @@ function ReviewPageContent({ examId }: { examId: number }) {
     );
   };
 
-  const handleApproveAll = useCallback(() => {
+  const handleApproveAll = useCallback(async () => {
     if (!clusterData) return;
     const allSubClusters = clusterData.clusters.flatMap((g) => g.sub_clusters);
     if (allSubClusters.length === 0) return;
 
-    let pending = allSubClusters.length;
-    let failed = 0;
-
-    allSubClusters.forEach((sub) => {
-      approveCluster.mutate(
-        { clusterId: sub.cluster_id },
-        {
-          onSuccess: () => {
-            pending--;
-            if (pending === 0 && failed === 0) {
-              toast.success("All clusters approved");
-              setReviewedQuestions((prev) => new Set(prev).add(activeQuestion));
-            }
-          },
-          onError: () => {
-            failed++;
-            pending--;
-          },
-        }
-      );
-    });
+    const results = await Promise.allSettled(
+      allSubClusters.map((sub) =>
+        approveCluster.mutateAsync({ clusterId: sub.cluster_id })
+      )
+    );
+    const failed = results.filter((r) => r.status === "rejected").length;
+    if (failed === 0) {
+      toast.success("All clusters approved");
+      setReviewedQuestions((prev) => new Set(prev).add(activeQuestion));
+    } else {
+      toast.error(`${failed} cluster(s) failed to approve`);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clusterData, approveCluster, activeQuestion]);
 
   const handleAdjustSubmit = () => {
-    if (adjustDialog.resultId === null) return;
+    if (!adjustDialog.resultId) return;
     const score = parseFloat(adjustScore);
     if (isNaN(score) || score < 0 || score > adjustDialog.maxScore) {
       toast.error(`Score must be between 0 and ${adjustDialog.maxScore}`);
@@ -304,19 +295,13 @@ function ReviewPageContent({ examId }: { examId: number }) {
                   </div>
 
                   {/* Note: sample_answers from the cluster API don't carry a result_id.
-                      The dialog is wired; a full /results lookup would be needed
-                      to resolve the correct resultId in production. */}
+                      Adjust Score is disabled until the cluster API includes it. */}
                   <Button
                     variant="outline"
                     size="sm"
                     className="gap-1.5"
-                    onClick={() =>
-                      openAdjustDialog(
-                        0, // placeholder — sample_answers lack result_id
-                        selectedSample.score,
-                        activeRubric?.max_marks ?? 10
-                      )
-                    }
+                    disabled
+                    title="Score adjustment not available for cluster samples — requires result_id"
                   >
                     <SlidersHorizontal className="h-3.5 w-3.5" />
                     Adjust Score

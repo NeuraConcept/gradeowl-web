@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ClusterGroup } from "@/lib/api/types";
 
-interface SampleAnswer {
+export interface SampleAnswer {
   student_identifier: string;
   feedback: string;
   score: number;
@@ -15,12 +15,14 @@ interface SampleAnswer {
 
 interface ClusterPanelProps {
   cluster: ClusterGroup;
+  maxMarks: number;
   onSelectSample: (sample: SampleAnswer) => void;
   selectedSample?: SampleAnswer;
 }
 
 export function ClusterPanel({
   cluster,
+  maxMarks,
   onSelectSample,
   selectedSample,
 }: ClusterPanelProps) {
@@ -91,7 +93,7 @@ export function ClusterPanel({
                 </div>
                 <div className="flex items-center gap-2 text-[10px]">
                   <span className="text-muted-foreground">{sub.count} students</span>
-                  <span className={cn("font-semibold", scoreColor(sub.avg_score, 10))}>
+                  <span className={cn("font-semibold", scoreColor(sub.avg_score, maxMarks))}>
                     avg {sub.avg_score.toFixed(1)}
                   </span>
                 </div>
@@ -122,7 +124,7 @@ export function ClusterPanel({
                           <span
                             className={cn(
                               "text-[10px] font-semibold shrink-0",
-                              scoreColor(sample.score, 10)
+                              scoreColor(sample.score, maxMarks)
                             )}
                           >
                             {sample.score}

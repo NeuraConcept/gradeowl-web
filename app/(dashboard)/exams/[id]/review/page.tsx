@@ -17,16 +17,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ClusterPanel } from "@/components/cluster-panel";
+import { ClusterPanel, type SampleAnswer } from "@/components/cluster-panel";
 import { useClusters, useApproveCluster, useAdjustResult } from "@/lib/api/hooks/use-clusters";
 import { useRubric } from "@/lib/api/hooks/use-rubric";
 import { cn } from "@/lib/utils";
-
-interface SampleAnswer {
-  student_identifier: string;
-  feedback: string;
-  score: number;
-}
 
 interface AdjustDialogState {
   open: boolean;
@@ -73,32 +67,6 @@ function ReviewPageContent({ examId }: { examId: number }) {
   const totalQuestions = clusterData?.total_questions ?? 0;
   const activeRubric = rubrics?.find((r) => r.question_number === activeQuestion);
 
-  // Keyboard navigation
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === "ArrowLeft" && activeQuestion > 1) {
-        setActiveQuestion((q) => q - 1);
-        setSelectedSample(undefined);
-      } else if (e.key === "ArrowRight" && activeQuestion < totalQuestions) {
-        setActiveQuestion((q) => q + 1);
-        setSelectedSample(undefined);
-      } else if (e.key === "Enter" && clusterData) {
-        // Approve first sub-cluster of first cluster
-        const firstCluster = clusterData.clusters[0];
-        if (firstCluster?.sub_clusters[0]) {
-          handleApproveCluster(firstCluster.sub_clusters[0].cluster_id);
-        }
-      }
-    },
-    [activeQuestion, totalQuestions, clusterData]
-  );
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
   const handleApproveCluster = (clusterId: number) => {
     approveCluster.mutate(
       { clusterId },
@@ -112,7 +80,7 @@ function ReviewPageContent({ examId }: { examId: number }) {
     );
   };
 
-  const handleApproveAll = () => {
+  const handleApproveAll = useCallback(() => {
     if (!clusterData) return;
     const allSubClusters = clusterData.clusters.flatMap((g) => g.sub_clusters);
     if (allSubClusters.length === 0) return;
@@ -138,7 +106,8 @@ function ReviewPageContent({ examId }: { examId: number }) {
         }
       );
     });
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clusterData, approveCluster, activeQuestion]);
 
   const handleAdjustSubmit = () => {
     if (adjustDialog.resultId === null) return;
@@ -164,6 +133,28 @@ function ReviewPageContent({ examId }: { examId: number }) {
       }
     );
   };
+
+  // Keyboard navigation
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "ArrowLeft" && activeQuestion > 1) {
+        setActiveQuestion((q) => q - 1);
+        setSelectedSample(undefined);
+      } else if (e.key === "ArrowRight" && activeQuestion < totalQuestions) {
+        setActiveQuestion((q) => q + 1);
+        setSelectedSample(undefined);
+      } else if (e.key === "Enter") {
+        handleApproveAll();
+      }
+    },
+    [activeQuestion, totalQuestions, handleApproveAll]
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   const openAdjustDialog = (resultId: number, currentScore: number, maxScore: number) => {
     setAdjustDialog({ open: true, resultId, currentScore, maxScore });
@@ -244,6 +235,7 @@ function ReviewPageContent({ examId }: { examId: number }) {
                   <ClusterPanel
                     key={idx}
                     cluster={cluster}
+                    maxMarks={activeRubric?.max_marks ?? 10}
                     onSelectSample={setSelectedSample}
                     selectedSample={selectedSample}
                   />
@@ -290,7 +282,8 @@ function ReviewPageContent({ examId }: { examId: number }) {
                         className={cn(
                           "text-xl font-bold",
                           (() => {
-                            const pct = selectedSample.score / 10;
+                            const max = activeRubric?.max_marks ?? 10;
+                            const pct = max > 0 ? selectedSample.score / max : 0;
                             if (pct > 0.8) return "text-success";
                             if (pct >= 0.4) return "text-warning";
                             return "text-coral";
@@ -298,7 +291,9 @@ function ReviewPageContent({ examId }: { examId: number }) {
                         )}
                       >
                         {selectedSample.score}
-                        <span className="text-sm font-normal text-muted-foreground">/10</span>
+                        <span className="text-sm font-normal text-muted-foreground">
+                          /{activeRubric?.max_marks ?? "?"}
+                        </span>
                       </p>
                     </div>
                   </div>

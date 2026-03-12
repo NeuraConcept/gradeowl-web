@@ -34,6 +34,7 @@ export function ExamCard({ exam, onEdit, onDelete }: ExamCardProps) {
               {exam.status === "DRAFT" && (
                 <DropdownMenu>
                   <DropdownMenuTrigger
+                    aria-label={`Options for ${exam.title}`}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
                     onClick={(e) => e.preventDefault()}
                   >

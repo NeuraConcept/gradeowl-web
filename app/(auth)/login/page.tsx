@@ -29,9 +29,7 @@ export default function LoginPage() {
   const { setUser } = useAuthStore();
   const router = useRouter();
 
-  async function exchangeToken(
-    idToken: string,
-  ): Promise<{ id: number; email: string; name: string }> {
+  async function exchangeToken(idToken: string): Promise<void> {
     const res = await fetch("/api/auth/token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -39,12 +37,12 @@ export default function LoginPage() {
       credentials: "include",
     });
     if (!res.ok) throw new Error("Token exchange failed");
-    return res.json();
   }
 
   async function handleAuth(
     firebaseAuth: () => Promise<{
       idToken: string;
+      uid: string;
       displayName: string | null;
       email: string | null;
     }>,
@@ -53,14 +51,15 @@ export default function LoginPage() {
     try {
       const {
         idToken,
+        uid,
         displayName,
         email: firebaseEmail,
       } = await firebaseAuth();
-      const userData = await exchangeToken(idToken);
+      await exchangeToken(idToken);
       setUser({
-        id: userData.id,
-        email: userData.email || firebaseEmail || "user",
-        name: userData.name || displayName || firebaseEmail || "user",
+        id: parseInt(uid, 10) || 0,
+        email: firebaseEmail || "user",
+        name: displayName || firebaseEmail || "user",
       });
       router.push("/");
     } catch (err) {
@@ -78,6 +77,7 @@ export default function LoginPage() {
       const idToken = await result.user.getIdToken();
       return {
         idToken,
+        uid: result.user.uid,
         displayName: result.user.displayName,
         email: result.user.email,
       };
@@ -99,7 +99,12 @@ export default function LoginPage() {
         );
       } catch (err: unknown) {
         const firebaseError = err as { code?: string };
-        if (firebaseError.code === "auth/user-not-found") {
+        // Firebase v9+ with Email Enumeration Protection collapses
+        // user-not-found into invalid-credential
+        if (
+          firebaseError.code === "auth/user-not-found" ||
+          firebaseError.code === "auth/invalid-credential"
+        ) {
           userCredential = await createUserWithEmailAndPassword(
             auth,
             email,
@@ -112,6 +117,7 @@ export default function LoginPage() {
       const idToken = await userCredential.user.getIdToken();
       return {
         idToken,
+        uid: userCredential.user.uid,
         displayName: userCredential.user.displayName,
         email: userCredential.user.email,
       };

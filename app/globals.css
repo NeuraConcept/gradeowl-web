@@ -71,7 +71,7 @@
   --muted-foreground: oklch(0.50 0 0);     /* #6B6B6B */
   --accent: oklch(0.82 0.08 15);           /* #FFB2B2 soft pink */
   --accent-foreground: oklch(0.27 0 0);
-  --destructive: oklch(0.63 0.16 20);      /* #E36A6A (same as primary) */
+  --destructive: oklch(0.52 0.20 25);      /* deeper red, distinct from primary */
   --border: oklch(0.92 0.01 60);           /* #E8E2D8 */
   --input: oklch(0.92 0.01 60);            /* #E8E2D8 */
   --ring: oklch(0.63 0.16 20);             /* #E36A6A */

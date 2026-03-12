@@ -19,8 +19,8 @@ export const handlers = [
     return HttpResponse.json(exam);
   }),
   http.post(`${API_BASE}/exams`, async ({ request }) => {
-    const body = await request.json();
-    const exam = createExam(body as Partial<typeof mockExams[0]>);
+    const body = (await request.json()) as Partial<import("@/lib/api/types").CreateExamRequest>;
+    const exam = createExam(body);
     return HttpResponse.json(exam, { status: 201 });
   }),
   http.get(`${API_BASE}/exams/:id/analysis-progress`, () => {

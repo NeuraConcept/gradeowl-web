@@ -2,9 +2,14 @@ import type { Exam, Rubric, SubmissionSummary, GradingProgress, AnalysisProgress
 
 let nextId = 1;
 
+export function resetIdCounter() {
+  nextId = 1;
+}
+
 export function createExam(overrides: Partial<Exam> = {}): Exam {
+  const id = nextId++;
   return {
-    id: nextId++,
+    id,
     teacher_id: 1,
     subject: "Mathematics",
     class_name: "Class 10-A",
@@ -18,8 +23,9 @@ export function createExam(overrides: Partial<Exam> = {}): Exam {
 }
 
 export function createRubric(overrides: Partial<Rubric> = {}): Rubric {
+  const id = nextId++;
   return {
-    id: nextId++,
+    id,
     exam_id: 1,
     question_number: 1,
     max_marks: 10,
@@ -36,9 +42,10 @@ export function createRubric(overrides: Partial<Rubric> = {}): Rubric {
 }
 
 export function createSubmission(overrides: Partial<SubmissionSummary> = {}): SubmissionSummary {
+  const id = nextId++;
   return {
-    id: nextId++,
-    student_identifier: `Student ${nextId}`,
+    id,
+    student_identifier: `Student ${id}`,
     status: "UPLOADED",
     total_score: null,
     page_count: 3,

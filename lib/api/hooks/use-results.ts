@@ -53,6 +53,8 @@ export async function exportCSV(examId: number) {
   const a = document.createElement("a");
   a.href = url;
   a.download = `exam-${examId}-results.csv`;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 100);
 }

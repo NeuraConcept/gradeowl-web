@@ -12,7 +12,10 @@ export function useAnalysisProgress(examId: number, enabled = true) {
       const data = query.state.data;
       if (!data) return false;
       const isActive =
-        data.answers_analyzing > 0 || data.reconciliation_analyzing > 0;
+        data.answers_analyzing > 0 ||
+        data.reconciliation_analyzing > 0 ||
+        data.answers_pending > 0 ||
+        data.reconciliation_pending > 0;
       return isActive ? 2000 : false;
     },
   });

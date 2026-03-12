@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import { Loader2, CheckCircle, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface PageThumbnailProps {
   src: string;
@@ -12,16 +10,8 @@ interface PageThumbnailProps {
 }
 
 export function PageThumbnail({ src, name, status, onRemove }: PageThumbnailProps) {
-  const [hovered, setHovered] = useState(false);
-
   return (
-    <div
-      className="relative"
-      style={{ width: 80, height: 96 }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* Image */}
+    <div className="group relative h-24 w-20">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
@@ -35,8 +25,8 @@ export function PageThumbnail({ src, name, status, onRemove }: PageThumbnailProp
           <Loader2 className="h-5 w-5 animate-spin text-white" />
         </div>
       )}
-      {status === "done" && hovered && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/30">
+      {status === "done" && (
+        <div className="absolute inset-0 hidden items-center justify-center rounded-md bg-black/30 group-hover:flex">
           <CheckCircle className="h-5 w-5 text-white" />
         </div>
       )}
@@ -47,13 +37,13 @@ export function PageThumbnail({ src, name, status, onRemove }: PageThumbnailProp
       )}
 
       {/* Remove button — visible on hover when not uploading */}
-      {status !== "uploading" && hovered && onRemove && (
+      {status !== "uploading" && onRemove && (
         <button
           onClick={(e) => {
             e.stopPropagation();
             onRemove();
           }}
-          className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background shadow-sm transition-opacity"
+          className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background shadow-sm opacity-0 transition-opacity group-hover:opacity-100"
           aria-label={`Remove ${name}`}
         >
           <X className="h-3 w-3" />
@@ -61,7 +51,7 @@ export function PageThumbnail({ src, name, status, onRemove }: PageThumbnailProp
       )}
 
       {/* Filename */}
-      <p className="mt-1 truncate text-center text-[10px] text-muted-foreground" style={{ maxWidth: 80 }}>
+      <p className="mt-1 w-20 truncate text-center text-[10px] text-muted-foreground">
         {name}
       </p>
     </div>

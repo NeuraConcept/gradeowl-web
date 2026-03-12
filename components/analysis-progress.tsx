@@ -23,7 +23,7 @@ const statusStyle: Record<
 };
 
 function StatusPill({ status }: { status: AnalysisStatus }) {
-  const s = statusStyle[status];
+  const s = statusStyle[status] ?? { label: status, className: "bg-gray-100 text-gray-600" };
   return (
     <Badge className={s.className} variant="outline">
       {s.label}

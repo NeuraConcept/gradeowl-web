@@ -13,29 +13,33 @@ export async function splitPdfToPages(file: File): Promise<File[]> {
 
   const pages: File[] = [];
 
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const scale = 2;
-    const viewport = page.getViewport({ scale });
+  try {
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const scale = 2;
+      const viewport = page.getViewport({ scale });
 
-    const canvas = document.createElement("canvas");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
+      const canvas = document.createElement("canvas");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Could not get canvas context");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not get canvas context");
 
-    await page.render({ canvas, canvasContext: ctx, viewport }).promise;
+      await page.render({ canvas, canvasContext: ctx, viewport }).promise;
 
-    const blob = await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob(
-        (b) => (b ? resolve(b) : reject(new Error("Canvas toBlob failed"))),
-        "image/png"
-      );
-    });
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (b) => (b ? resolve(b) : reject(new Error("Canvas toBlob failed"))),
+          "image/png"
+        );
+      });
 
-    const pageName = `${file.name.replace(/\.pdf$/i, "")}_page${pageNum}.png`;
-    pages.push(new File([blob], pageName, { type: "image/png" }));
+      const pageName = `${file.name.replace(/\.pdf$/i, "")}_page_${pageNum}.png`;
+      pages.push(new File([blob], pageName, { type: "image/png" }));
+    }
+  } finally {
+    pdf.destroy();
   }
 
   return pages;

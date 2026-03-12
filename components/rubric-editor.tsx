@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Trash2, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Trash2, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,8 +24,13 @@ export function RubricEditor({ rubric, onChange }: RubricEditorProps) {
   );
   const [maxMarks, setMaxMarks] = useState(rubric.max_marks);
 
-  // Sync parent when internal state changes
+  // Sync parent when internal state changes (skip initial mount)
+  const isMountedRef = useRef(false);
   useEffect(() => {
+    if (!isMountedRef.current) {
+      isMountedRef.current = true;
+      return;
+    }
     onChange(rubric.question_number, criteria, maxMarks);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [criteria, maxMarks]);
@@ -140,7 +145,7 @@ export function RubricEditor({ rubric, onChange }: RubricEditorProps) {
         {/* Marks mismatch alert */}
         {!marksMatch && (
           <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <AlertCircle className="h-4 w-4 shrink-0" />
             Criteria marks ({totalMarks}) do not equal max marks ({maxMarks}).
           </div>
         )}

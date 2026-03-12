@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useCallback } from "react";
+import { use, useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import {
@@ -30,6 +30,7 @@ import {
 import { splitPdfToPages } from "@/lib/pdf-split";
 
 interface PendingFile {
+  id: string;
   file: File;
   previewUrl: string;
   status: "uploading" | "done" | "error";
@@ -59,6 +60,18 @@ export default function UploadPage({
   const [isProcessingQP, setIsProcessingQP] = useState(false);
   const [isProcessingAK, setIsProcessingAK] = useState(false);
 
+  // Revoke all blob URLs on unmount to prevent memory leaks
+  const pendingQPRef = useRef(pendingQP);
+  const pendingAKRef = useRef(pendingAK);
+  pendingQPRef.current = pendingQP;
+  pendingAKRef.current = pendingAK;
+  useEffect(() => {
+    return () => {
+      pendingQPRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+      pendingAKRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+    };
+  }, []);
+
   // Expand PDF files into individual page files
   async function expandFiles(files: File[]): Promise<File[]> {
     const result: File[] = [];
@@ -82,6 +95,7 @@ export default function UploadPage({
       setIsProcessingQP(true);
       const expanded = await expandFiles(files);
       const pending: PendingFile[] = expanded.map((f) => ({
+        id: crypto.randomUUID(),
         file: f,
         previewUrl: URL.createObjectURL(f),
         status: "uploading",
@@ -91,23 +105,20 @@ export default function UploadPage({
 
       // Upload each file
       for (let i = 0; i < expanded.length; i++) {
+        const fileId = pending[i].id;
         const formData = new FormData();
         formData.append("file", expanded[i]);
         try {
           await uploadQP.mutateAsync(formData);
           setPendingQP((prev) =>
             prev.map((p) =>
-              p.previewUrl === pending[i].previewUrl
-                ? { ...p, status: "done" }
-                : p
+              p.id === fileId ? { ...p, status: "done" } : p
             )
           );
         } catch {
           setPendingQP((prev) =>
             prev.map((p) =>
-              p.previewUrl === pending[i].previewUrl
-                ? { ...p, status: "error" }
-                : p
+              p.id === fileId ? { ...p, status: "error" } : p
             )
           );
           toast.error(`Failed to upload ${expanded[i].name}`);
@@ -123,6 +134,7 @@ export default function UploadPage({
       setIsProcessingAK(true);
       const expanded = await expandFiles(files);
       const pending: PendingFile[] = expanded.map((f) => ({
+        id: crypto.randomUUID(),
         file: f,
         previewUrl: URL.createObjectURL(f),
         status: "uploading",
@@ -131,23 +143,20 @@ export default function UploadPage({
       setIsProcessingAK(false);
 
       for (let i = 0; i < expanded.length; i++) {
+        const fileId = pending[i].id;
         const formData = new FormData();
         formData.append("file", expanded[i]);
         try {
           await uploadAK.mutateAsync(formData);
           setPendingAK((prev) =>
             prev.map((p) =>
-              p.previewUrl === pending[i].previewUrl
-                ? { ...p, status: "done" }
-                : p
+              p.id === fileId ? { ...p, status: "done" } : p
             )
           );
         } catch {
           setPendingAK((prev) =>
             prev.map((p) =>
-              p.previewUrl === pending[i].previewUrl
-                ? { ...p, status: "error" }
-                : p
+              p.id === fileId ? { ...p, status: "error" } : p
             )
           );
           toast.error(`Failed to upload ${expanded[i].name}`);
@@ -158,28 +167,29 @@ export default function UploadPage({
     [uploadAK]
   );
 
-  const removeQPPending = (previewUrl: string) => {
+  const removeQPPending = (fileId: string) => {
     setPendingQP((prev) => {
-      const item = prev.find((p) => p.previewUrl === previewUrl);
+      const item = prev.find((p) => p.id === fileId);
       if (item) URL.revokeObjectURL(item.previewUrl);
-      return prev.filter((p) => p.previewUrl !== previewUrl);
+      return prev.filter((p) => p.id !== fileId);
     });
   };
 
-  const removeAKPending = (previewUrl: string) => {
+  const removeAKPending = (fileId: string) => {
     setPendingAK((prev) => {
-      const item = prev.find((p) => p.previewUrl === previewUrl);
+      const item = prev.find((p) => p.id === fileId);
       if (item) URL.revokeObjectURL(item.previewUrl);
-      return prev.filter((p) => p.previewUrl !== previewUrl);
+      return prev.filter((p) => p.id !== fileId);
     });
   };
 
-  const isAnalyzing =
+  const isAnalyzing = Boolean(
     analysis &&
     (analysis.answers_analyzing > 0 ||
       analysis.answers_pending > 0 ||
       analysis.reconciliation_analyzing > 0 ||
-      analysis.reconciliation_pending > 0);
+      analysis.reconciliation_pending > 0)
+  );
   const analysisDone =
     analysis &&
     analysis.total_questions > 0 &&
@@ -241,13 +251,13 @@ export default function UploadPage({
                   ))}
                   {pendingQP.map((p) => (
                     <PageThumbnail
-                      key={p.previewUrl}
+                      key={p.id}
                       src={p.previewUrl}
                       name={p.file.name}
                       status={p.status}
                       onRemove={
                         p.status !== "uploading"
-                          ? () => removeQPPending(p.previewUrl)
+                          ? () => removeQPPending(p.id)
                           : undefined
                       }
                     />
@@ -290,13 +300,13 @@ export default function UploadPage({
                   ))}
                   {pendingAK.map((p) => (
                     <PageThumbnail
-                      key={p.previewUrl}
+                      key={p.id}
                       src={p.previewUrl}
                       name={p.file.name}
                       status={p.status}
                       onRemove={
                         p.status !== "uploading"
-                          ? () => removeAKPending(p.previewUrl)
+                          ? () => removeAKPending(p.id)
                           : undefined
                       }
                     />

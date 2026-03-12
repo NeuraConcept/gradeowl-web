@@ -182,7 +182,7 @@ export default function RubricPage({
         <div className="space-y-4">
           {rubrics.map((rubric) => (
             <RubricEditor
-              key={rubric.id}
+              key={`${rubric.id}-${rubric.updated_at}`}
               rubric={rubric}
               onChange={handleChange}
             />

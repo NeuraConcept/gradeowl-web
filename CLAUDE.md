@@ -137,7 +137,17 @@ Steps unlock progressively based on exam state (analysis complete, rubric approv
 - **Auth**: Workload Identity Federation (OIDC) — no stored keys
 - **Backend**: `https://api.neuraconcept.com`
 - **Firebase project**: `neuraconcept-grading`
-- **CI/CD**: GitHub Actions — CI on PRs/dev pushes, deploy on main push
+- **CI/CD**: GitHub Actions (see below)
+
+## CI/CD Workflows
+
+| Workflow | File | Trigger | Purpose |
+|---|---|---|---|
+| CI | `ci.yml` | PR to main/dev, push to dev | Lint, typecheck, test, build, Playwright E2E |
+| Deploy | `deploy.yml` | Push to main | Build Docker image, push to Artifact Registry, deploy to Cloud Run |
+| Release PR | `release-pr.yml` | Push to dev | Auto-creates `dev → main` release PR |
+| Claude Code | `claude.yml` | `@claude` mentions in issues/PRs | Claude Code action for issue triage |
+| Claude Code Review | `claude-code-review.yml` | PR opened/sync/reopen | Auto-reviews PRs using code-review plugin |
 
 ## Environment Variables
 

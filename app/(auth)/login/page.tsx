@@ -6,7 +6,7 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import { getFirebaseAuth, googleProvider } from "@/lib/firebase";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -72,7 +72,7 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     await handleAuth(async () => {
-      const result = await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(getFirebaseAuth(), googleProvider);
       const idToken = await result.user.getIdToken();
       return {
         idToken,
@@ -90,7 +90,7 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const cred = await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
       const idToken = await cred.user.getIdToken();
       await exchangeToken(idToken);
       setUser({
@@ -119,7 +119,7 @@ export default function LoginPage() {
       return;
     }
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(getFirebaseAuth(), email);
       toast.success("Password reset email sent");
     } catch {
       toast.error("Failed to send reset email");

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ClipboardList, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/stores/auth-store";
-import { auth } from "@/lib/firebase";
+import { getFirebaseAuth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { toast } from "sonner";
 import type { LucideIcon } from "lucide-react";
@@ -31,7 +31,7 @@ export function Sidebar() {
         method: "POST",
         credentials: "include",
       });
-      await signOut(auth);
+      await signOut(getFirebaseAuth());
       clearUser();
       router.push("/login");
     } catch {

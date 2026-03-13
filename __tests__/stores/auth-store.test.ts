@@ -15,7 +15,7 @@ describe("auth store", () => {
   it("sets user on setUser", () => {
     useAuthStore
       .getState()
-      .setUser({ id: 1, email: "test@test.com", name: "Test" });
+      .setUser({ uid: "abc123", email: "test@test.com", name: "Test" });
     const state = useAuthStore.getState();
     expect(state.isAuthenticated).toBe(true);
     expect(state.user?.email).toBe("test@test.com");
@@ -24,7 +24,7 @@ describe("auth store", () => {
   it("clears user on clearUser", () => {
     useAuthStore
       .getState()
-      .setUser({ id: 1, email: "test@test.com", name: "Test" });
+      .setUser({ uid: "abc123", email: "test@test.com", name: "Test" });
     useAuthStore.getState().clearUser();
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
   });

@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   signInWithPopup,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
@@ -57,7 +56,7 @@ export default function LoginPage() {
       } = await firebaseAuth();
       await exchangeToken(idToken);
       setUser({
-        id: parseInt(uid, 10) || 0,
+        uid,
         email: firebaseEmail || "user",
         name: displayName || firebaseEmail || "user",
       });
@@ -89,39 +88,29 @@ export default function LoginPage() {
       toast.error("Email and password required");
       return;
     }
-    await handleAuth(async () => {
-      let userCredential;
-      try {
-        userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password,
-        );
-      } catch (err: unknown) {
-        const firebaseError = err as { code?: string };
-        // Firebase v9+ with Email Enumeration Protection collapses
-        // user-not-found into invalid-credential
-        if (
-          firebaseError.code === "auth/user-not-found" ||
-          firebaseError.code === "auth/invalid-credential"
-        ) {
-          userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password,
-          );
-        } else {
-          throw err;
-        }
+    setLoading(true);
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await cred.user.getIdToken();
+      await exchangeToken(idToken);
+      setUser({
+        uid: cred.user.uid,
+        email: cred.user.email || "user",
+        name: cred.user.displayName || cred.user.email || "user",
+      });
+      router.push("/");
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code;
+      if (code === "auth/invalid-credential") {
+        toast.error("Invalid email or password");
+      } else if (code === "auth/too-many-requests") {
+        toast.error("Too many attempts. Try again later.");
+      } else {
+        toast.error("Login failed");
       }
-      const idToken = await userCredential.user.getIdToken();
-      return {
-        idToken,
-        uid: userCredential.user.uid,
-        displayName: userCredential.user.displayName,
-        email: userCredential.user.email,
-      };
-    });
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleReset() {

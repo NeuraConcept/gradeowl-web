@@ -27,6 +27,8 @@ jobs:
             -t asia-south1-docker.pkg.dev/neuraconcept-grading/cloud-run/gradeowl-web:${{ github.sha }} .
           docker push asia-south1-docker.pkg.dev/neuraconcept-grading/cloud-run/gradeowl-web:${{ github.sha }}
       - run: |
+          # TODO: Replace API_URL with internal Cloud Run URL for lower latency
+          # (currently routes through Cloudflare -> Cloud Run, adding an external hop)
           gcloud run deploy gradeowl-web \
             --image asia-south1-docker.pkg.dev/neuraconcept-grading/cloud-run/gradeowl-web:${{ github.sha }} \
             --region asia-south1 \

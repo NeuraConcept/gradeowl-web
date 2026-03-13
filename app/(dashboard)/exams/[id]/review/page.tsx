@@ -67,19 +67,6 @@ function ReviewPageContent({ examId }: { examId: number }) {
   const totalQuestions = clusterData?.total_questions ?? 0;
   const activeRubric = rubrics?.find((r) => r.question_number === activeQuestion);
 
-  const handleApproveCluster = (clusterId: number) => {
-    approveCluster.mutate(
-      { clusterId },
-      {
-        onSuccess: () => {
-          toast.success("Cluster approved");
-          setReviewedQuestions((prev) => new Set(prev).add(activeQuestion));
-        },
-        onError: () => toast.error("Failed to approve cluster"),
-      }
-    );
-  };
-
   const handleApproveAll = useCallback(async () => {
     if (!clusterData) return;
     const allSubClusters = clusterData.clusters.flatMap((g) => g.sub_clusters);
@@ -97,7 +84,6 @@ function ReviewPageContent({ examId }: { examId: number }) {
     } else {
       toast.error(`${failed} cluster(s) failed to approve`);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clusterData, approveCluster, activeQuestion]);
 
   const handleAdjustSubmit = () => {
@@ -146,12 +132,6 @@ function ReviewPageContent({ examId }: { examId: number }) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
-
-  const openAdjustDialog = (resultId: number, currentScore: number, maxScore: number) => {
-    setAdjustDialog({ open: true, resultId, currentScore, maxScore });
-    setAdjustScore(String(currentScore));
-    setAdjustNotes("");
-  };
 
   return (
     <div className="space-y-4">

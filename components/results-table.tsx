@@ -70,7 +70,7 @@ export function ResultsTable({ results, summary, onRowClick }: ResultsTableProps
       ? results[0].questions.map((q) => q.question_number)
       : [];
 
-  const SortIcon = ({ col }: { col: SortKey }) => {
+  const sortIcon = (col: SortKey) => {
     if (sortKey !== col) return <ChevronsUpDown className="h-3 w-3 ml-0.5 text-muted-foreground/60" />;
     return sortDir === "asc" ? (
       <ChevronUp className="h-3 w-3 ml-0.5" />
@@ -129,7 +129,7 @@ export function ResultsTable({ results, summary, onRowClick }: ResultsTableProps
                   className="flex items-center text-xs font-medium hover:text-foreground"
                   onClick={() => handleSort("student_identifier")}
                 >
-                  Student <SortIcon col="student_identifier" />
+                  Student {sortIcon("student_identifier")}
                 </button>
               </TableHead>
               <TableHead>
@@ -137,7 +137,7 @@ export function ResultsTable({ results, summary, onRowClick }: ResultsTableProps
                   className="flex items-center text-xs font-medium hover:text-foreground"
                   onClick={() => handleSort("total_score")}
                 >
-                  Total <SortIcon col="total_score" />
+                  Total {sortIcon("total_score")}
                 </button>
               </TableHead>
               {questionNums.map((qn) => (
@@ -150,7 +150,7 @@ export function ResultsTable({ results, summary, onRowClick }: ResultsTableProps
                   className="flex items-center text-xs font-medium hover:text-foreground"
                   onClick={() => handleSort("status")}
                 >
-                  Status <SortIcon col="status" />
+                  Status {sortIcon("status")}
                 </button>
               </TableHead>
             </TableRow>

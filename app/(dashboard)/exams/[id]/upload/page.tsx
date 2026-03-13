@@ -63,8 +63,10 @@ export default function UploadPage({
   // Revoke all blob URLs on unmount to prevent memory leaks
   const pendingQPRef = useRef(pendingQP);
   const pendingAKRef = useRef(pendingAK);
-  pendingQPRef.current = pendingQP;
-  pendingAKRef.current = pendingAK;
+  useEffect(() => {
+    pendingQPRef.current = pendingQP;
+    pendingAKRef.current = pendingAK;
+  });
   useEffect(() => {
     return () => {
       pendingQPRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
@@ -125,7 +127,6 @@ export default function UploadPage({
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [uploadQP]
   );
 
@@ -163,7 +164,6 @@ export default function UploadPage({
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [uploadAK]
   );
 

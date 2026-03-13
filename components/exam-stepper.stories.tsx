@@ -28,12 +28,13 @@ export const AllLocked: Story = {
   },
 };
 
-export const UploadActive: Story = {
+export const InProgress: Story = {
   args: {
-    examStatus: "DRAFT",
-    analysisComplete: false,
-    rubricApproved: false,
-    hasSubmissions: false,
+    examId: 1,
+    examStatus: "GRADING",
+    analysisComplete: true,
+    rubricApproved: true,
+    hasSubmissions: true,
   },
 };
 

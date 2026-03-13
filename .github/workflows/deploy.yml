@@ -21,6 +21,9 @@ jobs:
       - run: gcloud auth configure-docker asia-south1-docker.pkg.dev
       - run: |
           docker build --platform linux/amd64 \
+            --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=neuraconcept-grading \
+            --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=neuraconcept-grading.firebaseapp.com \
             -t asia-south1-docker.pkg.dev/neuraconcept-grading/cloud-run/gradeowl-web:${{ github.sha }} .
           docker push asia-south1-docker.pkg.dev/neuraconcept-grading/cloud-run/gradeowl-web:${{ github.sha }}
       - run: |
@@ -29,4 +32,4 @@ jobs:
             --region asia-south1 \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars "API_URL=https://api.neuraconcept.com,NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }},NEXT_PUBLIC_FIREBASE_PROJECT_ID=neuraconcept-grading,NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=neuraconcept-grading.firebaseapp.com"
+            --set-env-vars "API_URL=https://api.neuraconcept.com"

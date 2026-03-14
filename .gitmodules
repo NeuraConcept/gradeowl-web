@@ -1,0 +1,4 @@
+[submodule "projects/gradeowl-web"]
+	path = projects/gradeowl-web
+	url = https://github.com/NeuraConcept/gradeowl-web.git
+	branch = dev

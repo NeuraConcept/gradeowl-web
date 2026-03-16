@@ -16,7 +16,7 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: projects/278573043109/locations/global/workloadIdentityPools/github-actions-pool/providers/github
-          service_account: github-actions-sa@neuraconcept-grading.iam.gserviceaccount.com
+          service_account: grading-backend@neuraconcept-grading.iam.gserviceaccount.com
       - uses: google-github-actions/setup-gcloud@v2
       - run: gcloud auth configure-docker asia-south1-docker.pkg.dev
       - run: |
@@ -34,4 +34,5 @@ jobs:
             --region asia-south1 \
             --platform managed \
             --allow-unauthenticated \
+            --service-account grading-backend@neuraconcept-grading.iam.gserviceaccount.com \
             --set-env-vars "API_URL=https://api.neuraconcept.com"

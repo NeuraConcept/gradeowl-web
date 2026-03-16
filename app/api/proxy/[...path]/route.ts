@@ -45,8 +45,15 @@ async function proxyRequest(
     });
 
     const responseHeaders = new Headers();
+    const skipHeaders = new Set([
+      "transfer-encoding",
+      "connection",
+      "set-cookie",
+      "content-encoding",
+      "content-length",
+    ]);
     res.headers.forEach((value, key) => {
-      if (!["transfer-encoding", "connection", "set-cookie"].includes(key.toLowerCase())) {
+      if (!skipHeaders.has(key.toLowerCase())) {
         responseHeaders.set(key, value);
       }
     });

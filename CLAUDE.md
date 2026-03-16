@@ -93,6 +93,7 @@ All API calls go through `/api/proxy/[...path]` which:
 - Forwards requests to the backend (`API_URL` env var)
 - Auto-refreshes expired tokens via `/api/auth/refresh`
 - Keeps tokens out of client-side JavaScript
+- Strips `content-encoding` and `content-length` from backend responses because Node.js `fetch` auto-decompresses gzip — forwarding the original headers would cause clients to expect compressed data they already received decompressed
 
 ### Authentication Flow
 1. Client authenticates via Firebase (Google Sign-In or email/password)
@@ -133,8 +134,9 @@ Steps unlock progressively based on exam state (analysis complete, rubric approv
 
 - **Platform**: Google Cloud Run (`asia-south1`)
 - **Image**: Multi-stage Dockerfile with standalone Next.js output
-- **Registry**: `asia-south1-docker.pkg.dev/neuraconcept-grading/cloud-run/gradeowl-web`
+- **Registry**: `asia-south1-docker.pkg.dev/neuraconcept-grading/grading-services/gradeowl-web`
 - **Auth**: Workload Identity Federation (OIDC) — no stored keys
+- **Public URL**: `https://gradeowl.neuraconcept.com` (Cloudflare Worker proxy to Cloud Run)
 - **Backend**: `https://api.neuraconcept.com`
 - **Firebase project**: `neuraconcept-grading`
 - **CI/CD**: GitHub Actions (see below)

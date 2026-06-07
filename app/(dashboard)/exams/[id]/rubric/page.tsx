@@ -71,7 +71,7 @@ export default function RubricPage({
       ([questionNumber, { criteria, maxMarks }]) => ({
         question_number: questionNumber,
         max_marks: maxMarks,
-        criteria_json: criteria,
+        criteria: criteria,
       })
     );
 

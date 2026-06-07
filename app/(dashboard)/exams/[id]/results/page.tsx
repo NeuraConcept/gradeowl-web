@@ -25,6 +25,7 @@ import {
 } from "@/lib/api/hooks/use-results";
 import { useSubmissions } from "@/lib/api/hooks/use-submissions";
 import type { StudentResult } from "@/lib/api/types";
+import { imagePathToProxyUrl } from "@/lib/api/utils";
 
 export default function ResultsPage({
   params,
@@ -89,6 +90,9 @@ function ResultsPageContent({ examId }: { examId: number }) {
 
   const pages = annotatedPages ?? [];
   const currentPage = pages[annotatedPageIndex];
+  const currentPageUrl = imagePathToProxyUrl(
+    currentPage?.annotated ?? currentPage?.original ?? null
+  );
 
   return (
     <div className="space-y-4">
@@ -209,7 +213,7 @@ function ResultsPageContent({ examId }: { examId: number }) {
               <div className="relative rounded-lg overflow-hidden border border-border bg-muted/20">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={currentPage?.annotated_url ?? currentPage?.original_url}
+                  src={currentPageUrl ?? ""}
                   alt={`Page ${currentPage?.page_number}`}
                   className="w-full object-contain max-h-[420px]"
                 />

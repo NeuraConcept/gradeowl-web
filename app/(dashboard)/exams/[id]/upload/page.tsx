@@ -28,6 +28,7 @@ import {
   useRetryAnalysis,
 } from "@/lib/api/hooks/use-analysis";
 import { splitPdfToPages } from "@/lib/pdf-split";
+import { imagePathToProxyUrl } from "@/lib/api/utils";
 
 interface PendingFile {
   id: string;
@@ -244,7 +245,7 @@ export default function UploadPage({
                   {qpPages.map((page) => (
                     <PageThumbnail
                       key={page.id}
-                      src={`/api/proxy/static/uploads/${page.image_path}`}
+                      src={imagePathToProxyUrl(page.image_path) ?? ""}
                       name={`Page ${page.page_number}`}
                       status="done"
                     />
@@ -293,7 +294,7 @@ export default function UploadPage({
                   {akPages.map((page) => (
                     <PageThumbnail
                       key={page.id}
-                      src={`/api/proxy/static/uploads/${page.image_path}`}
+                      src={imagePathToProxyUrl(page.image_path) ?? ""}
                       name={`Page ${page.page_number}`}
                       status="done"
                     />

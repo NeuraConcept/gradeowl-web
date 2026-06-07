@@ -21,6 +21,7 @@ import { ClusterPanel, type SampleAnswer } from "@/components/cluster-panel";
 import { useClusters, useApproveCluster, useAdjustResult } from "@/lib/api/hooks/use-clusters";
 import { useRubric } from "@/lib/api/hooks/use-rubric";
 import { cn } from "@/lib/utils";
+import { imagePathToProxyUrl, deriveAnnotatedUrl } from "@/lib/api/utils";
 
 interface AdjustDialogState {
   open: boolean;
@@ -49,6 +50,8 @@ export default function ReviewPage({
 function ReviewPageContent({ examId }: { examId: number }) {
   const [activeQuestion, setActiveQuestion] = useState(1);
   const [selectedSample, setSelectedSample] = useState<SampleAnswer | undefined>();
+  const [showAnnotated, setShowAnnotated] = useState(true);
+  const [failedAnnotatedUrl, setFailedAnnotatedUrl] = useState<string | null>(null);
   const [reviewedQuestions, setReviewedQuestions] = useState<Set<number>>(new Set());
   const [adjustDialog, setAdjustDialog] = useState<AdjustDialogState>({
     open: false,
@@ -132,6 +135,13 @@ function ReviewPageContent({ examId }: { examId: number }) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
+
+  const originalProxyUrl = imagePathToProxyUrl(selectedSample?.image_url ?? null);
+  const annotatedProxyUrl = deriveAnnotatedUrl(selectedSample?.image_url ?? null);
+  const annotatedFailed = annotatedProxyUrl !== null && failedAnnotatedUrl === annotatedProxyUrl;
+  const canShowAnnotated =
+    showAnnotated && !annotatedFailed && Boolean(annotatedProxyUrl);
+  const displayedImageUrl = canShowAnnotated ? annotatedProxyUrl : originalProxyUrl;
 
   return (
     <div className="space-y-4">
@@ -274,14 +284,77 @@ function ReviewPageContent({ examId }: { examId: number }) {
                     <p className="text-sm leading-relaxed">{selectedSample.feedback}</p>
                   </div>
 
-                  {/* Note: sample_answers from the cluster API don't carry a result_id.
-                      Adjust Score is disabled until the cluster API includes it. */}
+                  {/* Student answer sheet image (annotated overlay if available, original otherwise) */}
+                  {displayedImageUrl ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Answer Sheet
+                        </p>
+                        {annotatedProxyUrl && !annotatedFailed && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-6 text-[10px] px-2"
+                            onClick={() => setShowAnnotated((v) => !v)}
+                          >
+                            {showAnnotated ? "Show original" : "Show annotated"}
+                          </Button>
+                        )}
+                      </div>
+                      <div className="rounded-md border border-border overflow-hidden bg-muted/20">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          key={displayedImageUrl}
+                          src={displayedImageUrl}
+                          alt={`Answer sheet for ${selectedSample.student_identifier ?? "student"}`}
+                          className="w-full h-auto max-h-[60vh] object-contain bg-white"
+                          onError={() => {
+                            // If annotated overlay 404s (not generated yet), fall back to original.
+                            if (canShowAnnotated) {
+                              setFailedAnnotatedUrl(annotatedProxyUrl);
+                            }
+                          }}
+                        />
+                      </div>
+                      {canShowAnnotated && (
+                        <p className="text-[10px] text-muted-foreground">
+                          Showing AI-annotated overlay. Click toggle to view the
+                          original page.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-md border border-dashed border-border bg-muted/20 p-3 text-center">
+                      <p className="text-xs text-muted-foreground">
+                        No image available for this submission
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedSample.transcription && (
+                    <div className="rounded-md border border-border bg-muted/30 p-3">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">
+                        Transcription
+                      </p>
+                      <p className="text-xs leading-relaxed whitespace-pre-wrap">
+                        {selectedSample.transcription}
+                      </p>
+                    </div>
+                  )}
+
                   <Button
                     variant="outline"
                     size="sm"
                     className="gap-1.5"
-                    disabled
-                    title="Score adjustment not available for cluster samples — requires result_id"
+                    onClick={() =>
+                      setAdjustDialog({
+                        open: true,
+                        resultId: selectedSample.id,
+                        currentScore: selectedSample.score,
+                        maxScore: selectedSample.max_score ?? activeRubric?.max_marks ?? 10,
+                      })
+                    }
                   >
                     <SlidersHorizontal className="h-3.5 w-3.5" />
                     Adjust Score
@@ -318,7 +391,7 @@ function ReviewPageContent({ examId }: { examId: number }) {
                     </Badge>
                   </div>
                   <div className="space-y-1.5">
-                    {activeRubric.criteria_json.map((criterion, idx) => (
+                    {activeRubric.criteria.map((criterion, idx) => (
                       <div
                         key={idx}
                         className="flex items-start justify-between gap-2 rounded-md bg-muted/40 px-2.5 py-1.5"

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ClipboardList, Settings, LogOut } from "lucide-react";
+import { ClipboardList, Settings, Shield, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { getFirebaseAuth } from "@/lib/firebase";
@@ -63,6 +63,19 @@ export function Sidebar() {
             {item.label}
           </Link>
         ))}
+        <div className="my-2 h-px bg-border" />
+        <Link
+          href="/admin"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+            pathname === "/admin"
+              ? "bg-coral text-white"
+              : "text-muted-foreground hover:bg-warm-yellow",
+          )}
+        >
+          <Shield className="h-4 w-4" />
+          Admin
+        </Link>
       </nav>
       <div className="border-t border-border p-3">
         <button

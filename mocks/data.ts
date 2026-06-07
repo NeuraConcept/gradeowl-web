@@ -29,7 +29,7 @@ export function createRubric(overrides: Partial<Rubric> = {}): Rubric {
     exam_id: 1,
     question_number: 1,
     max_marks: 10,
-    criteria_json: [
+    criteria: [
       { description: "Correct formula", marks: 5 },
       { description: "Correct answer", marks: 5 },
     ],

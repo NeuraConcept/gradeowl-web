@@ -171,7 +171,7 @@ export interface ClusterSampleAnswer {
   content_summary: string | null;
   transcription: string | null;
   /**
-   * Original page image — either a signed `https://...` URL (GCS) or an
+   * Original page image — either a signed `https://...` object-storage URL or an
    * absolute backend filesystem path (dev). Use `imagePathToProxyUrl` from
    * `@/lib/api/utils` before rendering in an `<img>`.
    */

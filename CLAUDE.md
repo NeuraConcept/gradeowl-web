@@ -79,7 +79,7 @@ gradeowl-web/
 ├── __tests__/                # Vitest unit tests (api/, hooks/, stores/)
 ├── e2e/                      # Playwright E2E tests
 ├── .storybook/               # Storybook config (main.ts, preview.ts)
-├── .github/workflows/        # CI (lint, test, build, e2e) + Deploy (Cloud Run)
+├── .github/workflows/        # CI plus legacy Cloud Run deploy workflow
 ├── middleware.ts              # Auth redirect (cookie check)
 ├── Dockerfile                # Multi-stage standalone build for Cloud Run
 └── playwright.config.ts      # Playwright config
@@ -132,14 +132,12 @@ Steps unlock progressively based on exam state (analysis complete, rubric approv
 
 ## Deployment
 
-- **Platform**: Google Cloud Run (`asia-south1`)
+- **AWS MVP platform**: ECS/Fargate behind the parent workspace ALB (`infra/aws-mvp/`)
 - **Image**: Multi-stage Dockerfile with standalone Next.js output
-- **Registry**: `asia-south1-docker.pkg.dev/neuraconcept-grading/grading-services/gradeowl-web`
-- **Auth**: Workload Identity Federation (OIDC) — no stored keys
-- **Public URL**: `https://gradeowl.neuraconcept.com` (Cloudflare Worker proxy to Cloud Run)
 - **Backend**: `https://api.neuraconcept.com`
+- **Public URL**: `https://gradeowl.neuraconcept.com`
 - **Firebase project**: `neuraconcept-grading`
-- **CI/CD**: GitHub Actions (see below)
+- **Legacy path**: Existing Cloud Run workflow remains historical and should not be used for the AWS MVP unless explicitly requested.
 
 ## CI/CD Workflows
 

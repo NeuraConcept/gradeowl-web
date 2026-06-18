@@ -1,8 +1,8 @@
 /**
  * Convert a backend `image_path`/`image_url` into a URL the browser can load.
  *
- * In production (GCS), the backend returns a signed `https://...` URL — pass it through.
- * In dev (no GCS), the backend returns the absolute filesystem path of the file
+ * In production object storage, the backend returns a signed `https://...` URL — pass it through.
+ * In dev (no object storage), the backend returns the absolute filesystem path of the file
  * (e.g. `/Users/.../backend/data/uploads/exams/3/qp/file.jpeg` or
  * `/Users/.../backend/data/processed/foo_annotated.jpeg`).
  *
@@ -38,14 +38,14 @@ export function imagePathToProxyUrl(imagePath: string | null | undefined): strin
  * Backend convention (`FileService.get_processed_path`):
  *   `<UPLOAD_DIR>/exams/.../foo.jpeg` → `<PROCESSED_DIR>/foo_annotated.jpeg`
  *
- * In production GCS, the original is a signed URL pointing at the GCS object.
- * We can't predict the annotated GCS path from a signed URL alone, so this
+ * In production object storage, the original is a signed URL pointing at the object.
+ * We can't predict the annotated object path from a signed URL alone, so this
  * helper only produces a useful result for dev/local-filesystem paths.
  * Returns `null` when it can't safely derive the annotated path (e.g. signed URL).
  */
 export function deriveAnnotatedUrl(originalImagePath: string | null | undefined): string | null {
   if (!originalImagePath) return null;
-  // Signed GCS URLs aren't predictable — caller should use the explicit annotated endpoint.
+  // Signed object URLs aren't predictable — caller should use the explicit annotated endpoint.
   if (/^https?:\/\//i.test(originalImagePath)) return null;
 
   // Extract the basename and extension from the original path.

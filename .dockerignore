@@ -5,4 +5,6 @@ e2e
 __tests__
 .storybook
 mocks
+vitest.config.ts
+vitest.setup.ts
 *.md

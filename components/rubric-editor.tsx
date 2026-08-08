@@ -20,7 +20,7 @@ interface RubricEditorProps {
 
 export function RubricEditor({ rubric, onChange }: RubricEditorProps) {
   const [criteria, setCriteria] = useState<RubricCriterion[]>(
-    rubric.criteria_json
+    rubric.criteria
   );
   const [maxMarks, setMaxMarks] = useState(rubric.max_marks);
 

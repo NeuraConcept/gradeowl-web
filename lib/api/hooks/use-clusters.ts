@@ -16,10 +16,18 @@ export function useClusters(examId: number, question: number) {
 export function useApproveCluster(examId: number) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ clusterId, score }: { clusterId: number; score?: number }) =>
+    mutationFn: ({
+      clusterId,
+      question,
+      score,
+    }: {
+      clusterId: number;
+      question: number;
+      score: number;
+    }) =>
       apiClient.put(
-        `/clusters/${clusterId}/approve`,
-        score !== undefined ? { score_adjust: score } : undefined,
+        `/exams/${examId}/clusters/${clusterId}/approve?question=${question}`,
+        { score },
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clusters", examId] });
@@ -41,8 +49,8 @@ export function useAdjustResult(examId: number) {
       notes?: string;
     }) =>
       apiClient.put(`/grading-results/${resultId}/adjust`, {
-        teacher_adjusted_score: score,
-        teacher_notes: notes,
+        score,
+        notes,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clusters", examId] });

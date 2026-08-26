@@ -2,9 +2,9 @@
  * Convert a backend `image_path`/`image_url` into a URL the browser can load.
  *
  * In production object storage, the backend returns a signed `https://...` URL — pass it through.
- * In dev (no object storage), the backend returns the absolute filesystem path of the file
- * (e.g. `/Users/.../backend/data/uploads/exams/3/qp/file.jpeg` or
- * `/Users/.../backend/data/processed/foo_annotated.jpeg`).
+ * In dev (no object storage), the backend returns the absolute filesystem path of the file.
+ * The storage root is configurable, so it may be the default `data` directory or a custom
+ * root such as `/tmp/gradeowl-investor-demo-storage`.
  *
  * The static-file routes at the backend serve files via:
  *   - `/static/uploads/{relative_path}`   (relative to `<backend>/data/uploads/`)
@@ -23,7 +23,7 @@ export function imagePathToProxyUrl(imagePath: string | null | undefined): strin
     return `/api/proxy/static/processed/${relative}`;
   }
 
-  const uploadsMarker = "data/uploads/";
+  const uploadsMarker = "/uploads/";
   const uploadsIdx = imagePath.indexOf(uploadsMarker);
   const relative =
     uploadsIdx >= 0

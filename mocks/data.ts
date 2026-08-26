@@ -1,4 +1,11 @@
-import type { Exam, Rubric, SubmissionSummary, GradingProgress, AnalysisProgress } from "@/lib/api/types";
+import type {
+  Exam,
+  Rubric,
+  SubmissionSummary,
+  GradingProgress,
+  AnalysisProgress,
+  ExamActivity,
+} from "@/lib/api/types";
 
 let nextId = 1;
 
@@ -63,6 +70,18 @@ export function createGradingProgress(overrides: Partial<GradingProgress> = {}):
     in_progress: 0,
     queued: 30,
     progress_pct: 0,
+    ...overrides,
+  };
+}
+
+export function createActivity(overrides: Partial<ExamActivity> = {}): ExamActivity {
+  const id = nextId++;
+  return {
+    id,
+    actor_name: "Priya Sharma",
+    action: "exam.created",
+    summary: "Created the exam",
+    created_at: new Date().toISOString(),
     ...overrides,
   };
 }

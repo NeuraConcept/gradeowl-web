@@ -270,6 +270,45 @@ export interface StudentIdExtraction {
   suggested_identifier: string;
 }
 
+// Exam activity feed (collaborator-authorized mutation history)
+
+export interface ExamActivity {
+  id: number;
+  actor_name: string;
+  action: string;
+  summary: string;
+  created_at: string;
+}
+
+// Concept-action preview. These types intentionally form a small adapter boundary
+// until the concurrent mastery API is available to the web client.
+
+export type ConceptActionKind = "REPAIR_TASK" | "RECHECK_QUESTION" | "SMALL_GROUP_FLAG";
+
+export interface ConceptPrerequisiteNode {
+  concept_id: string;
+  name: string;
+}
+
+export interface ConceptActionRecommendation {
+  concept_id: string;
+  concept_name: string;
+  mastery_pct: number;
+  evidence: string;
+  prerequisite_trace: ConceptPrerequisiteNode[];
+  is_foundational: boolean;
+  action: {
+    kind: ConceptActionKind;
+    title: string;
+    detail: string;
+  };
+}
+
+export interface ConceptActionData {
+  source: "fixture" | "api";
+  recommendations: ConceptActionRecommendation[];
+}
+
 // Admin dashboard types
 
 export interface AdminDashboard {

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { ResultsTable } from "@/components/results-table";
 import { AnalyticsCharts } from "@/components/analytics-charts";
+import { ConceptActionPanel } from "@/components/concept-action-panel";
 import {
   useResults,
   useAnalytics,
@@ -24,6 +25,7 @@ import {
   exportCSV,
 } from "@/lib/api/hooks/use-results";
 import { useSubmissions } from "@/lib/api/hooks/use-submissions";
+import { useConceptActions } from "@/lib/api/hooks/use-concept-actions";
 import type { StudentResult } from "@/lib/api/types";
 import { imagePathToProxyUrl } from "@/lib/api/utils";
 
@@ -52,6 +54,7 @@ function ResultsPageContent({ examId }: { examId: number }) {
   const { data: resultsData, isLoading: resultsLoading } = useResults(examId);
   const { data: analyticsData, isLoading: analyticsLoading } = useAnalytics(examId);
   const { data: submissions } = useSubmissions(examId);
+  const { data: conceptActions, isLoading: conceptActionsLoading } = useConceptActions(examId);
   const finalizeExam = useFinalizeExam(examId);
 
   // Look up submissionId for selected student
@@ -140,6 +143,7 @@ function ResultsPageContent({ examId }: { examId: number }) {
         <TabsList>
           <TabsTrigger value="results">Results</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="concepts">Concept actions</TabsTrigger>
         </TabsList>
 
         {/* Results Tab */}
@@ -182,6 +186,28 @@ function ResultsPageContent({ examId }: { examId: number }) {
           ) : (
             <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               No analytics data available yet.
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="concepts" className="mt-4">
+          <div className="mb-3">
+            <h3 className="text-sm font-semibold">Concept diagnosis to action</h3>
+            <p className="text-sm text-muted-foreground">
+              Review the prerequisite behind a weak concept, then approve one focused next step.
+            </p>
+          </div>
+          {conceptActionsLoading ? (
+            <div className="space-y-3">
+              {[1, 2].map((n) => (
+                <Skeleton key={n} className="h-64 rounded-xl" />
+              ))}
+            </div>
+          ) : conceptActions ? (
+            <ConceptActionPanel {...conceptActions} />
+          ) : (
+            <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+              No concept evidence is available yet.
             </div>
           )}
         </TabsContent>

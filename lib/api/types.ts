@@ -310,6 +310,33 @@ export interface StudentMasteryResponse {
   concepts: StudentConceptMastery[];
 }
 
+export type MemberRole = "ADMIN" | "TEACHER";
+export type AssignmentStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface Organization {
+  id: number;
+  name: string;
+  email_domain: string | null;
+  role: MemberRole;
+  join_code: string | null;
+  created_at: string;
+  members: Array<{
+    user_id: number;
+    full_name: string | null;
+    username: string;
+    role: MemberRole;
+  }>;
+  sections: Array<{ id: number; class_name: string; label: string }>;
+  my_assignments: Array<{
+    id: number;
+    class_name: string;
+    subject: string;
+    section_id: number | null;
+    section_label: string | null;
+    status: AssignmentStatus;
+  }>;
+}
+
 // Admin dashboard types
 
 export interface AdminDashboard {

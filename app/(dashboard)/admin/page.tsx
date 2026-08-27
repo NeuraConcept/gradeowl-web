@@ -27,6 +27,8 @@ import {
 } from "@/lib/api/hooks/use-admin";
 import type { ExamStatus } from "@/lib/api/types";
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { useCurrentOrganization } from "@/components/organization-provider";
 
 // --- Stat card ---
 
@@ -335,6 +337,26 @@ function ErrorMessage({ message }: { message: string }) {
 // --- Main page ---
 
 export default function AdminPage() {
+  const { data: organization } = useCurrentOrganization();
+  if (organization?.role !== "ADMIN") {
+    return (
+      <Card className="mx-auto mt-16 max-w-xl">
+        <CardContent className="space-y-3 pt-6">
+          <h1 className="text-2xl font-bold">School admins only</h1>
+          <p className="text-muted-foreground">
+            Only a school administrator can manage school settings and staff.
+          </p>
+          <Link className="text-coral underline" href="/">
+            Return to exams
+          </Link>
+        </CardContent>
+      </Card>
+    );
+  }
+  return <AdminDashboard />;
+}
+
+function AdminDashboard() {
   const {
     data: dashboard,
     isLoading: dashboardLoading,

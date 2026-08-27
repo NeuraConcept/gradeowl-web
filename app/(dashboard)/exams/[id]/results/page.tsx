@@ -17,6 +17,7 @@ import {
 import { ResultsTable } from "@/components/results-table";
 import { AnalyticsCharts } from "@/components/analytics-charts";
 import { ConceptActionPanel } from "@/components/concept-action-panel";
+import { StudentMasteryPanel } from "@/components/student-mastery-panel";
 import {
   useResults,
   useAnalytics,
@@ -26,6 +27,7 @@ import {
 } from "@/lib/api/hooks/use-results";
 import { useSubmissions } from "@/lib/api/hooks/use-submissions";
 import { useConceptActions } from "@/lib/api/hooks/use-concept-actions";
+import { useStudentMastery } from "@/lib/api/hooks/use-student-mastery";
 import type { StudentResult } from "@/lib/api/types";
 import { imagePathToProxyUrl } from "@/lib/api/utils";
 
@@ -54,18 +56,27 @@ function ResultsPageContent({ examId }: { examId: number }) {
   const { data: resultsData, isLoading: resultsLoading } = useResults(examId);
   const { data: analyticsData, isLoading: analyticsLoading } = useAnalytics(examId);
   const { data: submissions } = useSubmissions(examId);
-  const { data: conceptActions, isLoading: conceptActionsLoading } = useConceptActions(examId);
+  const {
+    data: conceptActions,
+    isLoading: conceptActionsLoading,
+    isError: conceptActionsError,
+  } = useConceptActions(examId);
   const finalizeExam = useFinalizeExam(examId);
 
   // Look up submissionId for selected student
-  const submissionId =
+  const selectedSubmission =
     selectedResult && submissions
-      ? (submissions.find(
-          (s) => s.student_identifier === selectedResult.student_identifier
-        )?.id ?? 0)
-      : 0;
+      ? submissions.find((s) => s.student_identifier === selectedResult.student_identifier)
+      : undefined;
+  const submissionId = selectedSubmission?.id ?? 0;
+  const studentId = selectedSubmission?.student_id ?? null;
 
   const { data: annotatedPages, isLoading: pagesLoading } = useAnnotatedPages(submissionId);
+  const {
+    data: studentMastery,
+    isLoading: studentMasteryLoading,
+    isError: studentMasteryError,
+  } = useStudentMastery(studentId);
 
   const handleRowClick = (result: StudentResult) => {
     setSelectedResult(result);
@@ -143,7 +154,7 @@ function ResultsPageContent({ examId }: { examId: number }) {
         <TabsList>
           <TabsTrigger value="results">Results</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="concepts">Concept actions</TabsTrigger>
+          <TabsTrigger value="concepts">Concept diagnosis</TabsTrigger>
         </TabsList>
 
         {/* Results Tab */}
@@ -194,7 +205,7 @@ function ResultsPageContent({ examId }: { examId: number }) {
           <div className="mb-3">
             <h3 className="text-sm font-semibold">Concept diagnosis to action</h3>
             <p className="text-sm text-muted-foreground">
-              Review the prerequisite behind a weak concept, then approve one focused next step.
+              Weak concepts and next steps are derived from confirmed question tags and this exam&apos;s graded work.
             </p>
           </div>
           {conceptActionsLoading ? (
@@ -203,8 +214,10 @@ function ResultsPageContent({ examId }: { examId: number }) {
                 <Skeleton key={n} className="h-64 rounded-xl" />
               ))}
             </div>
+          ) : conceptActionsError ? (
+            <ConceptActionPanel concepts={[]} error />
           ) : conceptActions ? (
-            <ConceptActionPanel {...conceptActions} />
+            <ConceptActionPanel concepts={conceptActions.concepts} />
           ) : (
             <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               No concept evidence is available yet.
@@ -226,6 +239,30 @@ function ResultsPageContent({ examId }: { examId: number }) {
               {selectedResult?.student_identifier} — Answer Sheets
             </DialogTitle>
           </DialogHeader>
+
+          {selectedResult ? (
+            <section className="space-y-2">
+              <div>
+                <h3 className="text-sm font-semibold">Student concept mastery</h3>
+                <p className="text-sm text-muted-foreground">
+                  Derived from this student&apos;s actual graded work and confirmed question-concept tags.
+                </p>
+              </div>
+              {studentId === null ? (
+                <p className="text-sm text-muted-foreground">
+                  This submission has no resolved student record, so a student mastery trace is unavailable.
+                </p>
+              ) : studentMasteryLoading ? (
+                <Skeleton className="h-40 rounded-xl" />
+              ) : studentMasteryError ? (
+                <p className="text-sm text-muted-foreground">
+                  Student mastery could not be loaded from the authenticated backend endpoint.
+                </p>
+              ) : studentMastery ? (
+                <StudentMasteryPanel concepts={studentMastery.concepts} />
+              ) : null}
+            </section>
+          ) : null}
 
           {pagesLoading ? (
             <Skeleton className="h-64 w-full rounded-lg" />

@@ -53,6 +53,7 @@ export function createSubmission(overrides: Partial<SubmissionSummary> = {}): Su
   return {
     id,
     student_identifier: `Student ${id}`,
+    student_id: id,
     status: "UPLOADED",
     total_score: null,
     page_count: 3,

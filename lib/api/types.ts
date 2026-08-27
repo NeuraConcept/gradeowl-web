@@ -112,6 +112,7 @@ export interface RubricUpdate {
 export interface SubmissionSummary {
   id: number;
   student_identifier: string;
+  student_id: number | null;
   status: SubmissionStatus;
   total_score: number | null;
   page_count: number;
@@ -280,33 +281,33 @@ export interface ExamActivity {
   created_at: string;
 }
 
-// Concept-action preview. These types intentionally form a small adapter boundary
-// until the concurrent mastery API is available to the web client.
-
-export type ConceptActionKind = "REPAIR_TASK" | "RECHECK_QUESTION" | "SMALL_GROUP_FLAG";
-
-export interface ConceptPrerequisiteNode {
-  concept_id: string;
+/** Aggregated from this exam's confirmed question-concept tags and graded work. */
+export interface ConceptMasterySummary {
+  concept_id: number;
   name: string;
+  pct_correct: number;
+  student_count: number;
 }
 
-export interface ConceptActionRecommendation {
-  concept_id: string;
-  concept_name: string;
-  mastery_pct: number;
-  evidence: string;
-  prerequisite_trace: ConceptPrerequisiteNode[];
-  is_foundational: boolean;
-  action: {
-    kind: ConceptActionKind;
-    title: string;
-    detail: string;
-  };
+export interface ConceptSummaryResponse {
+  concepts: ConceptMasterySummary[];
 }
 
-export interface ConceptActionData {
-  source: "fixture" | "api";
-  recommendations: ConceptActionRecommendation[];
+export interface StudentConceptMastery {
+  concept_id: number;
+  name: string;
+  pct_correct: number;
+  root_cause?: Array<{
+    concept_id: number;
+    name: string;
+    hop: number;
+    confidence: number;
+  }>;
+}
+
+export interface StudentMasteryResponse {
+  student_id: number;
+  concepts: StudentConceptMastery[];
 }
 
 // Admin dashboard types

@@ -1,57 +1,38 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ConceptActionPanel } from "@/components/concept-action-panel";
-import type { ConceptActionRecommendation } from "@/lib/api/types";
+import type { ConceptMasterySummary } from "@/lib/api/types";
 
-const recommendations: ConceptActionRecommendation[] = [
+const concepts: ConceptMasterySummary[] = [
   {
-    concept_id: "fractions-equivalent",
-    concept_name: "Equivalent fractions",
-    mastery_pct: 0.38,
-    evidence: "Q. 6: 17 of 28 students missed the equivalent-fractions check.",
-    prerequisite_trace: [
-      { concept_id: "common-denominators", name: "Finding a common denominator" },
-      { concept_id: "multiplication-facts", name: "Multiplication facts" },
-    ],
-    is_foundational: false,
-    action: {
-      kind: "RECHECK_QUESTION",
-      title: "Recheck: Which fraction is equivalent to 3/4?",
-      detail: "Use this one-question check with the 17 students who missed Q. 6.",
-    },
-  },
-  {
-    concept_id: "place-value",
-    concept_name: "Place value",
-    mastery_pct: 0.46,
-    evidence: "Q. 2: 12 of 28 students need another look.",
-    prerequisite_trace: [],
-    is_foundational: true,
-    action: {
-      kind: "SMALL_GROUP_FLAG",
-      title: "Flag a small group for place-value practice",
-      detail: "Pull the 12 students for a ten-minute place-value repair task.",
-    },
+    concept_id: 91,
+    name: "Comparing quantities",
+    pct_correct: 0.35,
+    student_count: 1,
   },
 ];
 
 describe("ConceptActionPanel", () => {
-  it("turns a weak concept and two-hop root cause into an approvable recheck", () => {
-    render(<ConceptActionPanel recommendations={recommendations} source="fixture" />);
+  it("turns an actual weak class concept into a transparent teacher next step", () => {
+    render(<ConceptActionPanel concepts={concepts} />);
 
-    expect(screen.getAllByText("Equivalent fractions").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Multiplication facts").length).toBeGreaterThan(0);
-    expect(screen.getByText("Recheck: Which fraction is equivalent to 3/4?")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Approve recheck" }));
-    expect(screen.getByText("Approved for this review")).toBeInTheDocument();
+    expect(screen.getByText("Comparing quantities")).toBeInTheDocument();
+    expect(screen.getByText("35% correct")).toBeInTheDocument();
+    expect(screen.getByText("Based on 1 graded student.")).toBeInTheDocument();
+    expect(screen.getByText(/revisit Comparing quantities/i)).toBeInTheDocument();
   });
 
-  it("explains that a weak foundational concept has no upstream gap", () => {
-    render(<ConceptActionPanel recommendations={recommendations} source="fixture" />);
+  it("makes an absent concept summary explicit instead of filling it with sample recommendations", () => {
+    render(<ConceptActionPanel concepts={[]} />);
 
     expect(
-      screen.getByText("This is a foundational concept — no upstream gap."),
+      screen.getByText(/No confirmed question-to-concept tags are available/i),
     ).toBeInTheDocument();
+  });
+
+  it("reports an unavailable backend diagnosis instead of showing stale local data", () => {
+    render(<ConceptActionPanel concepts={[]} error />);
+
+    expect(screen.getByText(/Concept diagnosis could not be loaded/i)).toBeInTheDocument();
   });
 });

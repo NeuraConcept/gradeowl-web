@@ -1,15 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { conceptActionFixture } from "@/lib/concepts/fixture";
-import type { ConceptActionData } from "@/lib/api/types";
+import { apiClient } from "@/lib/api/client";
+import type { ConceptSummaryResponse } from "@/lib/api/types";
 
-/**
- * Fixture-backed until the Task 6-8 mastery routes publish their final response
- * contract. Swap only this query function for the proxy-backed API request.
- */
+/** Reads only the backend's derived, exam-level concept summary through the auth proxy. */
 export function useConceptActions(examId: number) {
-  return useQuery<ConceptActionData>({
+  return useQuery<ConceptSummaryResponse>({
     queryKey: ["concept-actions", examId],
-    queryFn: async () => conceptActionFixture,
+    queryFn: () => apiClient.get<ConceptSummaryResponse>(`/exams/${examId}/concept-summary`),
     enabled: examId > 0,
   });
 }

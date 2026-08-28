@@ -93,6 +93,7 @@ All API calls go through `/api/proxy/[...path]` which:
 - Forwards requests to the backend (`API_URL` env var)
 - Auto-refreshes expired tokens via `/api/auth/refresh`
 - Keeps tokens out of client-side JavaScript
+- Strips `content-encoding` and `content-length` from backend responses because Node.js `fetch` auto-decompresses gzip — forwarding the original headers would cause clients to expect compressed data they already received decompressed
 
 ### Authentication Flow
 1. Client authenticates via Firebase (Google Sign-In or email/password)

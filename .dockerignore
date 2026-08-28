@@ -7,4 +7,6 @@ __tests__
 mocks
 vitest.config.ts
 vitest.setup.ts
+playwright.config.ts
+*.stories.tsx
 *.md

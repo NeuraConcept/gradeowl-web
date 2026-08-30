@@ -19,7 +19,7 @@ export function ConceptActionPanel({
   if (error) {
     return (
       <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-        Concept diagnosis could not be loaded. Confirm the local backend exposes the authenticated concept-summary endpoint before presenting this step.
+        Concept diagnosis could not be loaded. Please try again before presenting this step.
       </div>
     );
   }
@@ -67,7 +67,7 @@ export function ConceptActionPanel({
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Next step</p>
                     <p className="font-medium">Revisit {concept.name} with a short repair check.</p>
                     <p className="mt-0.5 text-sm text-muted-foreground">
-                      This recommendation is based on the graded concept result above; this class-level endpoint does not claim a prerequisite root cause.
+                      No prerequisite root cause identified at this class level.
                     </p>
                   </div>
                 </div>

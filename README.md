@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GradeOwl Web
 
-## Getting Started
+Teacher-facing Next.js client for the GradeOwl assessment workflow: exam setup,
+rubric review, submission upload, grading review, and results.
 
-First, run the development server:
+## Local stack
+
+This app runs on port 3000 and normally talks to the GradeOwl backend on port
+8000 through the server-side proxy. Install dependencies and start the client:
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Set `API_URL` to the backend URL when it is not `http://localhost:8000`. The
+browser must call `/api/proxy/[...path]`, not the backend directly. The proxy
+reads the backend JWT from httpOnly cookies, attaches it server-side, and keeps
+backend tokens out of client-side JavaScript.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Firebase sign-in exchanges an ID token through `/api/auth/token`; the resulting
+access and refresh tokens are stored in httpOnly cookies. The local dev-login
+route is disabled unless both `APP_ENV=development` and a truthy
+`DEV_AUTH_BYPASS` are set, and it always requires an explicit `email` query
+parameter. Do not enable the bypass outside an isolated local demonstration.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Verification
 
-## Learn More
+```bash
+npm test
+npm run lint
+npx tsc --noEmit
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+Playwright tests require explicitly configured compatible local Web and backend
+services; do not start or deploy external systems only to run them.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The active MVP deployment target is AWS ECS/Fargate behind the parent
+workspace's ALB. The production web URL is `https://gradeowl.neuraconcept.com`
+and the backend URL is `https://api.neuraconcept.com`. Use the parent workspace
+AWS MVP deployment and readiness workflows for release operations.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`.github/workflows/deploy.yml` is retained only as the manually dispatched
+**Legacy Cloud Run rollback** workflow. It has no automatic trigger and is not
+the AWS MVP deployment path.

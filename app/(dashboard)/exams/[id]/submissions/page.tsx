@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { DropZone } from "@/components/drop-zone";
 import { useSubmissions, useUploadSubmissions } from "@/lib/api/hooks/use-submissions";
 import { splitPdfToPages } from "@/lib/pdf-split";
+import { formatDisplayDate } from "@/lib/utils";
 import type { SubmissionStatus } from "@/lib/api/types";
 
 const statusStyle: Record<SubmissionStatus, { label: string; className: string }> = {
@@ -226,7 +227,7 @@ export default function SubmissionsPage({
                           </Badge>
                         </td>
                         <td className="px-4 py-2 text-muted-foreground">
-                          {new Date(sub.created_at).toLocaleDateString()}
+                          {formatDisplayDate(sub.created_at)}
                         </td>
                       </tr>
                     );

@@ -5,6 +5,22 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function formatDisplayDate(value: string | null | undefined): string {
+  if (!value) return "—"
+
+  const timestamp = new Date(value)
+  if (Number.isNaN(timestamp.getTime())) return "—"
+
+  return timestamp.toLocaleDateString()
+}
+
+export function scoreColorClass(score: number, max: number): string {
+  const pct = max > 0 ? score / max : 0
+  if (pct > 0.8) return "text-success"
+  if (pct >= 0.4) return "text-warning"
+  return "text-coral"
+}
+
 /**
  * Formats an ISO timestamp as a short relative string ("5m ago", "3h ago"),
  * falling back to an absolute date once it's more than a week old.

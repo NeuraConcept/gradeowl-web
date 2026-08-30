@@ -61,7 +61,7 @@ export function StudentMasteryPanel({ concepts }: { concepts: StudentConceptMast
                   </>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    The backend returned no prerequisite edge for this concept.
+                    No prerequisite root cause identified for this concept.
                   </p>
                 )}
               </div>

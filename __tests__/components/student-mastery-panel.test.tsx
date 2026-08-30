@@ -12,6 +12,11 @@ const concepts: StudentConceptMastery[] = [
       { concept_id: 44, name: "Ratio as comparison", hop: 1, confidence: 0.93 },
     ],
   },
+  {
+    concept_id: 92,
+    name: "Plane Surface",
+    pct_correct: 0.4,
+  },
 ];
 
 describe("StudentMasteryPanel", () => {
@@ -21,6 +26,13 @@ describe("StudentMasteryPanel", () => {
     expect(screen.getAllByText("Comparing quantities")).toHaveLength(2);
     expect(screen.getByText("35% correct")).toBeInTheDocument();
     expect(screen.getAllByText("Ratio as comparison")).toHaveLength(2);
+  });
+
+  it("uses plain language when no prerequisite root cause is identified", () => {
+    render(<StudentMasteryPanel concepts={concepts} />);
+
+    expect(screen.getByText("No prerequisite root cause identified for this concept.")).toBeInTheDocument();
+    expect(screen.queryByText(/backend|endpoint|null|api|edge|node|payload|query/i)).not.toBeInTheDocument();
   });
 
   it("states when the backend has no derived mastery rather than using a sample student", () => {

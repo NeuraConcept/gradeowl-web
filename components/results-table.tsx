@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ScoreCell } from "@/components/score-cell";
-import { cn } from "@/lib/utils";
+import { cn, scoreColorClass } from "@/lib/utils";
 import type { StudentResult, ResultsSummary, SubmissionStatus } from "@/lib/api/types";
 
 const submissionStatusConfig: Record<SubmissionStatus, { label: string; className: string }> = {
@@ -79,14 +79,6 @@ export function ResultsTable({ results, summary, onRowClick }: ResultsTableProps
     );
   };
 
-  // Stat card color
-  const pctColor = (score: number, max: number) => {
-    const pct = max > 0 ? score / max : 0;
-    if (pct > 0.8) return "text-success";
-    if (pct >= 0.4) return "text-warning";
-    return "text-coral";
-  };
-
   return (
     <div className="space-y-4">
       {/* Summary stat cards */}
@@ -100,7 +92,7 @@ export function ResultsTable({ results, summary, onRowClick }: ResultsTableProps
         <Card size="sm">
           <CardContent className="pt-3">
             <p className="text-xs text-muted-foreground">Average Score</p>
-            <p className={cn("text-2xl font-bold", pctColor(summary.avg_score, results[0]?.max_possible ?? 100))}>
+            <p className={cn("text-2xl font-bold", scoreColorClass(summary.avg_score, results[0]?.max_possible ?? 100))}>
               {summary.avg_score.toFixed(1)}
             </p>
           </CardContent>

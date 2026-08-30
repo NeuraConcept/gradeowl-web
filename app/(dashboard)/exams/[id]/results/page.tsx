@@ -256,7 +256,7 @@ function ResultsPageContent({ examId }: { examId: number }) {
                 <Skeleton className="h-40 rounded-xl" />
               ) : studentMasteryError ? (
                 <p className="text-sm text-muted-foreground">
-                  Student mastery could not be loaded from the authenticated backend endpoint.
+                  Student mastery could not be loaded. Please try again.
                 </p>
               ) : studentMastery ? (
                 <StudentMasteryPanel concepts={studentMastery.concepts} />

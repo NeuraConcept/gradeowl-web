@@ -20,6 +20,10 @@ describe("ConceptActionPanel", () => {
     expect(screen.getByText("35% correct")).toBeInTheDocument();
     expect(screen.getByText("Based on 1 graded student.")).toBeInTheDocument();
     expect(screen.getByText(/revisit Comparing quantities/i)).toBeInTheDocument();
+    expect(
+      screen.getByText("No prerequisite root cause identified at this class level."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/endpoint/i)).not.toBeInTheDocument();
   });
 
   it("makes an absent concept summary explicit instead of filling it with sample recommendations", () => {

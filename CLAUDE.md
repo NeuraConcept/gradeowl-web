@@ -81,7 +81,7 @@ gradeowl-web/
 ├── .storybook/               # Storybook config (main.ts, preview.ts)
 ├── .github/workflows/        # CI plus legacy Cloud Run deploy workflow
 ├── middleware.ts              # Auth redirect (cookie check)
-├── Dockerfile                # Multi-stage standalone build for Cloud Run
+├── Dockerfile                # Multi-stage portable standalone/container image
 └── playwright.config.ts      # Playwright config
 ```
 

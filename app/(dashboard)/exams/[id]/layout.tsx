@@ -1,6 +1,8 @@
 "use client";
 
 import { use } from "react";
+import Link from "next/link";
+import { History } from "lucide-react";
 import { useExam } from "@/lib/api/hooks/use-exams";
 import { useAnalysisProgress } from "@/lib/api/hooks/use-analysis";
 import { useRubric } from "@/lib/api/hooks/use-rubric";
@@ -45,7 +47,16 @@ export default function ExamLayout({
             {exam.total_marks} marks
           </p>
         </div>
-        <StatusBadge status={exam.status} />
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/exams/${examId}/activity`}
+            className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 text-[0.8rem] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <History className="h-3.5 w-3.5" />
+            Activity
+          </Link>
+          <StatusBadge status={exam.status} />
+        </div>
       </div>
 
       <ExamStepper

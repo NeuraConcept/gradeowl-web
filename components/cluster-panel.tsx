@@ -4,14 +4,11 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { ClusterGroup } from "@/lib/api/types";
+import { cn, scoreColorClass } from "@/lib/utils";
+import type { ClusterGroup, ClusterSampleAnswer } from "@/lib/api/types";
 
-export interface SampleAnswer {
-  student_identifier: string;
-  feedback: string;
-  score: number;
-}
+// Re-export so the review page can keep importing { SampleAnswer } from this module.
+export type SampleAnswer = ClusterSampleAnswer;
 
 interface ClusterPanelProps {
   cluster: ClusterGroup;
@@ -42,20 +39,25 @@ export function ClusterPanel({
     });
   };
 
-  const scoreColor = (score: number, max: number) => {
-    const pct = max > 0 ? score / max : 0;
-    if (pct > 0.8) return "text-success";
-    if (pct >= 0.4) return "text-warning";
-    return "text-coral";
-  };
-
   return (
     <div className="rounded-lg border border-border bg-card p-3 space-y-2">
       {/* Cluster header */}
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-medium text-foreground leading-snug flex-1">
-          {cluster.rubric_pattern}
-        </p>
+        <div className="flex-1 space-y-1">
+          <p className="text-xs font-medium text-foreground leading-snug">
+            {cluster.rubric_pattern.label}
+          </p>
+          {cluster.rubric_pattern.criteria_met.length > 0 && (
+            <p className="text-[10px] text-success leading-snug">
+              ✓ {cluster.rubric_pattern.criteria_met.join(", ")}
+            </p>
+          )}
+          {cluster.rubric_pattern.criteria_missed.length > 0 && (
+            <p className="text-[10px] text-destructive leading-snug">
+              ✗ {cluster.rubric_pattern.criteria_missed.join(", ")}
+            </p>
+          )}
+        </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <Badge className="bg-muted text-muted-foreground text-[10px] px-1.5 py-0">
             <Users className="h-2.5 w-2.5 mr-0.5" />
@@ -93,7 +95,7 @@ export function ClusterPanel({
                 </div>
                 <div className="flex items-center gap-2 text-[10px]">
                   <span className="text-muted-foreground">{sub.count} students</span>
-                  <span className={cn("font-semibold", scoreColor(sub.avg_score, maxMarks))}>
+                  <span className={cn("font-semibold", scoreColorClass(sub.avg_score, maxMarks))}>
                     avg {sub.avg_score.toFixed(1)}
                   </span>
                 </div>
@@ -122,7 +124,7 @@ export function ClusterPanel({
                           <span
                             className={cn(
                               "text-[10px] font-semibold shrink-0",
-                              scoreColor(sample.score, maxMarks)
+                              scoreColorClass(sample.score, maxMarks)
                             )}
                           >
                             {sample.score}

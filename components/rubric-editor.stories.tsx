@@ -8,7 +8,7 @@ const baseRubric: Rubric = {
   exam_id: 1,
   question_number: 1,
   max_marks: 5,
-  criteria_json: [
+  criteria: [
     { description: "Correct formula used", marks: 2 },
     { description: "Proper working shown", marks: 2 },
     { description: "Final answer correct", marks: 1 },
@@ -52,7 +52,7 @@ export const MarksMismatch: Story = {
     rubric: {
       ...baseRubric,
       max_marks: 10,
-      criteria_json: [
+      criteria: [
         { description: "Correct formula used", marks: 2 },
         { description: "Proper working shown", marks: 2 },
         { description: "Final answer correct", marks: 1 },
@@ -65,7 +65,7 @@ export const EmptyCriteria: Story = {
   args: {
     rubric: {
       ...baseRubric,
-      criteria_json: [],
+      criteria: [],
       max_marks: 5,
     },
   },

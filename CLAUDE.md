@@ -79,9 +79,9 @@ gradeowl-web/
 ├── __tests__/                # Vitest unit tests (api/, hooks/, stores/)
 ├── e2e/                      # Playwright E2E tests
 ├── .storybook/               # Storybook config (main.ts, preview.ts)
-├── .github/workflows/        # CI (lint, test, build, e2e) + Deploy (Cloud Run)
+├── .github/workflows/        # CI plus legacy Cloud Run deploy workflow
 ├── middleware.ts              # Auth redirect (cookie check)
-├── Dockerfile                # Multi-stage standalone build for Cloud Run
+├── Dockerfile                # Multi-stage portable standalone/container image
 └── playwright.config.ts      # Playwright config
 ```
 
@@ -119,10 +119,10 @@ Steps unlock progressively based on exam state (analysis complete, rubric approv
 
 ## Branch Strategy
 
-- **main** — production, auto-deploys to Cloud Run. Never commit directly.
+- **main** — production branch. Never commit directly.
 - **dev** — integration branch. CI runs on PRs.
 - All work on `feature/*`, `fix/*`, or `chore/*` branches off `dev`.
-- PR flow: `feature → dev` (CI checks), then `dev → main` (CI + deploy).
+- PR flow: `feature → dev` (CI checks), then `dev → main`; AWS deployment is a separate manual operation.
 
 ## Testing
 
@@ -132,21 +132,19 @@ Steps unlock progressively based on exam state (analysis complete, rubric approv
 
 ## Deployment
 
-- **Platform**: Google Cloud Run (`asia-south1`)
+- **AWS MVP platform**: ECS/Fargate behind the parent workspace ALB (`infra/aws-mvp/`)
 - **Image**: Multi-stage Dockerfile with standalone Next.js output
-- **Registry**: `asia-south1-docker.pkg.dev/neuraconcept-grading/grading-services/gradeowl-web`
-- **Auth**: Workload Identity Federation (OIDC) — no stored keys
-- **Public URL**: `https://gradeowl.neuraconcept.com` (Cloudflare Worker proxy to Cloud Run)
 - **Backend**: `https://api.neuraconcept.com`
+- **Public URL**: `https://gradeowl.neuraconcept.com`
 - **Firebase project**: `neuraconcept-grading`
-- **CI/CD**: GitHub Actions (see below)
+- **Legacy path**: Existing Cloud Run workflow remains historical and should not be used for the AWS MVP unless explicitly requested.
 
 ## CI/CD Workflows
 
 | Workflow | File | Trigger | Purpose |
 |---|---|---|---|
 | CI | `ci.yml` | PR to main/dev, push to dev | Lint, typecheck, test, build, Playwright E2E |
-| Deploy | `deploy.yml` | Push to main | Build Docker image, push to Artifact Registry, deploy to Cloud Run |
+| Legacy Cloud Run rollback | `deploy.yml` | Manual dispatch only | Retained rollback/history workflow; not part of the AWS MVP deploy path |
 | Release PR | `release-pr.yml` | Push to dev | Auto-creates `dev → main` release PR |
 | Claude Code | `claude.yml` | `@claude` mentions in issues/PRs | Claude Code action for issue triage |
 | Claude Code Review | `claude-code-review.yml` | PR opened/sync/reopen | Auto-reviews PRs using code-review plugin |
@@ -159,3 +157,12 @@ Steps unlock progressively based on exam state (analysis complete, rubric approv
 | `NEXT_PUBLIC_FIREBASE_API_KEY` | Client | Firebase Web API key |
 | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Client | Firebase auth domain |
 | `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Client | Firebase project ID |
+
+## Local development authentication
+
+`/api/auth/dev-login` is intentionally unavailable unless both
+`APP_ENV=development` and `DEV_AUTH_BYPASS=true` (also accepts `1` or `yes`)
+are set. It requires an explicit `email` query parameter, exchanges it with a
+locally configured backend, and stores resulting backend tokens only in
+httpOnly cookies. Never enable this bypass for a production, ECS, or Cloud Run
+runtime.

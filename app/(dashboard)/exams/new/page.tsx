@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api/client";
 
 export default function CreateExamPage() {
   const router = useRouter();
@@ -39,8 +40,8 @@ export default function CreateExamPage() {
       });
       toast.success("Exam created");
       router.push(`/exams/${exam.id}`);
-    } catch {
-      toast.error("Failed to create exam");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to create exam"));
     }
   }
 

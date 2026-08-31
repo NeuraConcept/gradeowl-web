@@ -85,7 +85,7 @@ export default function GradingPage({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Grading Progress</h2>
         <div className="flex gap-2">
-          {!isGrading && (
+          {!isGrading && pct < 100 && (
             <Button
               onClick={handleStartGrading}
               disabled={startGrading.isPending}

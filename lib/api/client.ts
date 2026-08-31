@@ -8,6 +8,15 @@ export class ApiError extends Error {
   }
 }
 
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof ApiError && error.detail ? error.detail : fallback;
+}
+
+async function readApiError(response: Response): Promise<ApiError> {
+  const error = await response.json().catch(() => ({ detail: `HTTP ${response.status}` }));
+  return new ApiError(response.status, error.detail || `HTTP ${response.status}`);
+}
+
 let refreshPromise: Promise<boolean> | null = null;
 
 async function refreshTokens(): Promise<boolean> {
@@ -46,7 +55,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
         }
         return retryRes.json();
       }
-      throw new ApiError(retryRes.status, "Unauthorized after refresh");
+      throw await readApiError(retryRes);
     }
     if (typeof window !== "undefined") {
       window.location.href = "/login";
@@ -55,10 +64,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   if (!res.ok) {
-    const error = await res
-      .json()
-      .catch(() => ({ detail: `HTTP ${res.status}` }));
-    throw new ApiError(res.status, error.detail || `HTTP ${res.status}`);
+    throw await readApiError(res);
   }
 
   if (res.status === 204 || res.headers.get("content-length") === "0") {

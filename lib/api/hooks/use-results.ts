@@ -6,10 +6,37 @@ import type {
   AnnotatedPage,
 } from "@/lib/api/types";
 
+type RawResultsResponse = Omit<ResultsResponse, "results"> & {
+  results: Array<
+    Omit<ResultsResponse["results"][number], "questions"> & {
+      questions: Record<
+        string,
+        { score: number; max_score: number; feedback?: string; effective_score?: number }
+      >;
+    }
+  >;
+};
+
 export function useResults(examId: number) {
-  return useQuery({
+  return useQuery<ResultsResponse>({
     queryKey: ["results", examId],
-    queryFn: () => apiClient.get<ResultsResponse>(`/exams/${examId}/results`),
+    queryFn: async () => {
+      const raw = await apiClient.get<RawResultsResponse>(`/exams/${examId}/results`);
+      return {
+        ...raw,
+        results: raw.results.map((r) => ({
+          ...r,
+          questions: Object.entries(r.questions)
+            .map(([qn, q]) => ({
+              question_number: Number(qn),
+              score: q.score,
+              max_score: q.max_score,
+              effective_score: q.effective_score ?? q.score,
+            }))
+            .sort((a, b) => a.question_number - b.question_number),
+        })),
+      };
+    },
     enabled: !!examId,
   });
 }

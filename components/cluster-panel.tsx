@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, scoreColorClass } from "@/lib/utils";
 import type { ClusterGroup, ClusterSampleAnswer } from "@/lib/api/types";
 
 // Re-export so the review page can keep importing { SampleAnswer } from this module.
@@ -37,13 +37,6 @@ export function ClusterPanel({
       }
       return next;
     });
-  };
-
-  const scoreColor = (score: number, max: number) => {
-    const pct = max > 0 ? score / max : 0;
-    if (pct > 0.8) return "text-success";
-    if (pct >= 0.4) return "text-warning";
-    return "text-coral";
   };
 
   return (
@@ -102,7 +95,7 @@ export function ClusterPanel({
                 </div>
                 <div className="flex items-center gap-2 text-[10px]">
                   <span className="text-muted-foreground">{sub.count} students</span>
-                  <span className={cn("font-semibold", scoreColor(sub.avg_score, maxMarks))}>
+                  <span className={cn("font-semibold", scoreColorClass(sub.avg_score, maxMarks))}>
                     avg {sub.avg_score.toFixed(1)}
                   </span>
                 </div>
@@ -131,7 +124,7 @@ export function ClusterPanel({
                           <span
                             className={cn(
                               "text-[10px] font-semibold shrink-0",
-                              scoreColor(sample.score, maxMarks)
+                              scoreColorClass(sample.score, maxMarks)
                             )}
                           >
                             {sample.score}

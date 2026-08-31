@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const API_URL = process.env.API_URL || "http://localhost:8000";
+const DEV_AUTH_BYPASS_ENABLED =
+  process.env.APP_ENV === "development" &&
+  ["true", "1", "yes"].includes(process.env.DEV_AUTH_BYPASS?.toLowerCase() ?? "");
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -13,15 +16,20 @@ const COOKIE_OPTIONS = {
  * DEV ONLY — opens a browser-friendly login flow that bypasses Firebase.
  *
  * Visit:
- *   http://localhost:3000/api/auth/dev-login
  *   http://localhost:3000/api/auth/dev-login?email=you@example.com&name=Test+User
  *
- * Backend must be running with DEV_AUTH_BYPASS=true. The route hits the
- * backend's /auth/dev-login, sets httpOnly cookies (matching the production
- * auth flow), and redirects to "/".
+ * Both this app and the backend must run with APP_ENV=development and
+ * DEV_AUTH_BYPASS=true. The route requires an explicit email address.
  */
 export async function GET(request: NextRequest) {
-  const email = request.nextUrl.searchParams.get("email") || "dev@neuraconcept.com";
+  if (!DEV_AUTH_BYPASS_ENABLED) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  const email = request.nextUrl.searchParams.get("email")?.trim();
+  if (!email) {
+    return NextResponse.json({ detail: "email query parameter is required" }, { status: 400 });
+  }
   const fullName = request.nextUrl.searchParams.get("name") || undefined;
 
   const res = await fetch(`${API_URL}/auth/dev-login`, {

@@ -1,5 +1,12 @@
 import { http, HttpResponse } from "msw";
-import { createExam, createRubric, createSubmission, createGradingProgress, createAnalysisProgress } from "./data";
+import {
+  createExam,
+  createRubric,
+  createSubmission,
+  createGradingProgress,
+  createAnalysisProgress,
+  createActivity,
+} from "./data";
 
 const API_BASE = "/api/proxy";
 
@@ -34,6 +41,40 @@ export const handlers = [
   }),
   http.get(`${API_BASE}/exams/:id/grading-progress`, () => {
     return HttpResponse.json(createGradingProgress({ done: 15, queued: 15, progress_pct: 50 }));
+  }),
+  http.get(`${API_BASE}/exams/:id/activity`, () => {
+    return HttpResponse.json([
+      createActivity({
+        actor_name: "Priya Sharma",
+        action: "results.finalized",
+        summary: "Finalized the results",
+        created_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+      }),
+      createActivity({
+        actor_name: "Priya Sharma",
+        action: "cluster.approved",
+        summary: "Approved a cluster for Question 3",
+        created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+      }),
+      createActivity({
+        actor_name: "Rahul Verma",
+        action: "submissions.uploaded",
+        summary: "Uploaded 28 submission pages",
+        created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+      }),
+      createActivity({
+        actor_name: "Priya Sharma",
+        action: "rubric.approved",
+        summary: "Approved the rubric",
+        created_at: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
+      }),
+      createActivity({
+        actor_name: "Priya Sharma",
+        action: "exam.created",
+        summary: "Created the exam",
+        created_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+      }),
+    ]);
   }),
   http.post("/api/auth/token", () => {
     return HttpResponse.json({ access_token: "mock-jwt", refresh_token: "mock-refresh", token_type: "bearer" });

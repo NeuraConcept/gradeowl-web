@@ -11,7 +11,7 @@ import {
   Cell,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn, scoreColorClass } from "@/lib/utils";
 import type { AnalyticsResponse } from "@/lib/api/types";
 
 const CORAL = "#E36A6A";
@@ -154,12 +154,16 @@ export function AnalyticsCharts({ data }: AnalyticsChartsProps) {
                     <tr key={q.question_number} className="border-b border-border/50 last:border-0">
                       <td className="py-1.5 font-medium">Q{q.question_number}</td>
                       <td className="py-1.5">{q.max_marks}</td>
-                      <td className="py-1.5 font-semibold text-coral">
+                      <td className={cn("py-1.5 font-semibold", scoreColorClass(q.avg_score, q.max_marks))}>
                         {q.avg_score.toFixed(1)}
                       </td>
                       <td className="py-1.5">{q.attempts}</td>
-                      <td className="py-1.5 text-success">{q.above_80_pct}%</td>
-                      <td className="py-1.5 text-coral">{q.below_40_pct}%</td>
+                      <td className="py-1.5 text-success">
+                        {q.above_80_pct.toFixed(1)}%
+                      </td>
+                      <td className="py-1.5 text-coral">
+                        {q.below_40_pct.toFixed(1)}%
+                      </td>
                     </tr>
                   ))}
                 </tbody>

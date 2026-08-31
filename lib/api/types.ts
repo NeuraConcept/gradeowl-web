@@ -112,6 +112,7 @@ export interface RubricUpdate {
 export interface SubmissionSummary {
   id: number;
   student_identifier: string;
+  student_id: number | null;
   status: SubmissionStatus;
   total_score: number | null;
   page_count: number;
@@ -268,6 +269,72 @@ export interface StudentIdExtraction {
   class_section: string | null;
   confidence: "high" | "medium" | "low";
   suggested_identifier: string;
+}
+
+// Exam activity feed (collaborator-authorized mutation history)
+
+export interface ExamActivity {
+  id: number;
+  actor_name: string;
+  action: string;
+  summary: string;
+  created_at: string;
+}
+
+/** Aggregated from this exam's confirmed question-concept tags and graded work. */
+export interface ConceptMasterySummary {
+  concept_id: number;
+  name: string;
+  pct_correct: number;
+  student_count: number;
+}
+
+export interface ConceptSummaryResponse {
+  concepts: ConceptMasterySummary[];
+}
+
+export interface StudentConceptMastery {
+  concept_id: number;
+  name: string;
+  pct_correct: number;
+  root_cause?: Array<{
+    concept_id: number;
+    name: string;
+    hop: number;
+    confidence: number;
+  }>;
+}
+
+export interface StudentMasteryResponse {
+  student_id: number;
+  concepts: StudentConceptMastery[];
+}
+
+export type MemberRole = "ADMIN" | "TEACHER";
+export type AssignmentStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface Organization {
+  id: number;
+  name: string;
+  email_domain: string | null;
+  role: MemberRole;
+  join_code: string | null;
+  created_at: string;
+  members: Array<{
+    user_id: number;
+    full_name: string | null;
+    username: string;
+    role: MemberRole;
+  }>;
+  sections: Array<{ id: number; class_name: string; label: string }>;
+  my_assignments: Array<{
+    id: number;
+    class_name: string;
+    subject: string;
+    section_id: number | null;
+    section_label: string | null;
+    status: AssignmentStatus;
+  }>;
 }
 
 // Admin dashboard types

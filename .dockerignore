@@ -5,8 +5,8 @@ e2e
 __tests__
 .storybook
 mocks
-vitest.setup.ts
 vitest.config.ts
+vitest.setup.ts
 playwright.config.ts
 *.stories.tsx
 *.md

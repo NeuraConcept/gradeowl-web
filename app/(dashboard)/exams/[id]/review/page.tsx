@@ -77,7 +77,11 @@ function ReviewPageContent({ examId }: { examId: number }) {
 
     const results = await Promise.allSettled(
       allSubClusters.map((sub) =>
-        approveCluster.mutateAsync({ clusterId: sub.cluster_id })
+        approveCluster.mutateAsync({
+          clusterId: sub.cluster_id,
+          question: activeQuestion,
+          score: sub.avg_score,
+        })
       )
     );
     const failed = results.filter((r) => r.status === "rejected").length;
